@@ -23,7 +23,6 @@ def create_data_unif(n,beta=[10,1,1,1,1], dep_level=0.5,classification=False, no
     """
     # Create data
     # np.random.seed(42)
-    x0 = np.ones(n)
     x1 = np.random.uniform(-10,10,n)
     x2 = np.random.uniform(-10,10,n)
     x3 = np.random.uniform(-10,10,n)
@@ -45,7 +44,7 @@ def create_data_unif(n,beta=[10,1,1,1,1], dep_level=0.5,classification=False, no
         y = (y > np.median(y))*1
 
 
-    return y, np.concatenate((np.array([x0]).T, np.array([x1]).T, np.array([x2]).T, np.array([x3]).T, np.array([x4]).T), axis=1)
+    return y, np.concatenate((np.array([x1]).T, np.array([x2]).T, np.array([x3]).T, np.array([x4]).T), axis=1)
 
 def create_bsr_data(n, urange=[-3, 3], func=1):
     '''

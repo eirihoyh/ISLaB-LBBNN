@@ -9,29 +9,31 @@ from graphviz import Digraph
 import pipeline_functions as pip_func
 
 
-def plot_whole_path_graph(alpha_list, all_connections, save_path, zero_index=True, show=False):
+def plot_whole_path_graph(alpha_list, all_connections, save_path, zero_index=False, show=False):
     dot = Digraph(f"All paths!")
     n_layers = len(alpha_list) + 1
     dim = alpha_list[0].shape[0]
-    if not zero_index:
-        dim -= 1
+    if zero_index:
+        adder = 0
+    else:
+        adder = 1
     layer_list = pip_func.create_layer_name_list(n_layers)
     all_names = []
     for layer_ind, connection in enumerate(all_connections):
         for t, f in connection:
             if f >= dim: # Check if we use input in Hidden layer
-                from_node = f"I_{f-dim}"
+                from_node = f"I_{f-dim+adder}"
             else:
-                from_node = f"{layer_list[layer_ind]}_{f}"
+                from_node = f"{layer_list[layer_ind]}_{f+adder}"
                 
             if from_node not in all_names:  # Add from node as a used name
                 dot.node(from_node)
                 all_names.append(from_node)
 
             if t >= dim and layer_ind+1 < n_layers: # TODO: consider removing if statement
-                to_node = f"I_{t-dim}"
+                to_node = f"I_{t-dim+adder}"
             else:    
-                to_node = f"{layer_list[layer_ind+1]}_{t}"
+                to_node = f"{layer_list[layer_ind+1]}_{t+adder}"
 
             if to_node not in all_names:  # Add to node as a used name
                 dot.node(to_node)
@@ -48,29 +50,31 @@ def plot_whole_path_graph(alpha_list, all_connections, save_path, zero_index=Tru
     dot.render(save_path, view=show)
 
 
-def plot_whole_path_graph_weight(weight_list, all_connections, save_path, zero_index=True, show=True):
+def plot_whole_path_graph_weight(weight_list, all_connections, save_path, zero_index=False, show=True):
     dot = Digraph(f"All paths!")
     n_layers = len(weight_list) + 1
     dim = weight_list[0].shape[0]
-    if not zero_index:
-        dim -= 1
+    if zero_index:
+        adder = 0
+    else:
+        adder = 1
     layer_list = pip_func.create_layer_name_list(n_layers)
     all_names = []
     for layer_ind, connection in enumerate(all_connections):
         for t, f in connection:
             if f >= dim:
-                from_node = f"I_{f-dim}"
+                from_node = f"I_{f-dim + adder}"
             else:
-                from_node = f"{layer_list[layer_ind]}_{f}"
+                from_node = f"{layer_list[layer_ind]}_{f+adder}"
                 
             if from_node not in all_names:
                 dot.node(from_node)
                 all_names.append(from_node)
 
             if t >= dim and layer_ind+1 < n_layers:
-                to_node = f"I_{t-dim}"
+                to_node = f"I_{t-dim+adder}"
             else:    
-                to_node = f"{layer_list[layer_ind+1]}_{t}"
+                to_node = f"{layer_list[layer_ind+1]}_{t+adder}"
 
             if to_node not in all_names:
                 dot.node(to_node)
@@ -86,14 +90,14 @@ def plot_whole_path_graph_weight(weight_list, all_connections, save_path, zero_i
     dot.render(save_path, view=show)
 
 
-def run_path_graph(net, threshold=0.5, save_path="path_graphs/all_paths_input_skip", zero_index=True, show=True):
+def run_path_graph(net, threshold=0.5, save_path="path_graphs/all_paths_input_skip", zero_index=False, show=True):
     # net = copy.deepcopy(net)
     alpha_list = pip_func.get_alphas(net)
     clean_alpha_list = pip_func.clean_alpha(net, threshold)
     all_connections = pip_func.get_active_weights(clean_alpha_list)
     plot_whole_path_graph(alpha_list, all_connections, save_path=save_path, zero_index=zero_index, show=show)
 
-def run_path_graph_weight(net, threshold=0.5, save_path="path_graphs/all_paths_input_skip", zero_index=True, show=True, flow=False):
+def run_path_graph_weight(net, threshold=0.5, save_path="path_graphs/all_paths_input_skip", zero_index=False, show=True, flow=False):
     # net = copy.deepcopy(net)
     weight_list = pip_func.weight_matrices_numpy(net, flow=flow)
     clean_alpha_list = pip_func.clean_alpha(net, threshold)
