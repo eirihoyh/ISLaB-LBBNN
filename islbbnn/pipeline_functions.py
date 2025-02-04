@@ -34,7 +34,7 @@ def create_data_unif(n,beta=[10,1,1,1,1], dep_level=0.5,classification=False, no
         y = beta[0] + beta[1]*x1 + beta[2]*x2 + beta[3]*x1**2 + beta[4]*x2**2 + x1*x2 # non-linear model
     else:
         y = beta[0] + beta[1]*x1 + beta[2]*x2
-    rand0 = stats.norm.rvs(scale=0.01, size=n)
+    rand0 = stats.norm.rvs(scale=5, size=n)
     # rand0 = stats.norm.rvs(scale=0.5, size=n)
     y += rand0
     if classification:
@@ -737,6 +737,9 @@ def train(net, train_data, optimizer, batch_size, num_batches, p, DEVICE, nr_wei
         loss = negative_log_likelihood + net.kl() / num_batches
         loss.backward()
         optimizer.step()
+
+        del _x
+        del _y
 
     if verbose:
         print('loss', loss.item())

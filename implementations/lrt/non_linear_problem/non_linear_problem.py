@@ -40,36 +40,37 @@ SAMPLES = 1
 
 
 
-# Define BATCH sizes
-BATCH_SIZE = int((n_samples*0.8)/50)
-TEST_BATCH_SIZE = int(n_samples*0.10) # Would normally call this the "validation" part (will be used during training)
-VAL_BATCH_SIZE = int(n_samples*0.10) # and this the "test" part (will be used after training)
-
-TRAIN_SIZE = int((n_samples*0.80))
-TEST_SIZE = int(n_samples*0.10) # Would normally call this the "validation" part (will be used during training)
-VAL_SIZE = int(n_samples*0.10) # and this the "test" part (will be used after training)
-
-NUM_BATCHES_original = TRAIN_SIZE/BATCH_SIZE
-
-print(NUM_BATCHES_original)
-
-assert (TRAIN_SIZE % BATCH_SIZE) == 0
-assert (TEST_SIZE % TEST_BATCH_SIZE) == 0
-
 
 # Get linear data
-y, X = pip_func.create_data_unif(n_samples, beta=[100,1,1,1,1], dep_level=0.0, classification=class_problem, non_lin=non_lin)
+X_train_original = np.loadtxt("data/non-linear/0.0X_train.txt", delimiter=",")
+X_test_original = np.loadtxt("data/non-linear/0.0X_test.txt", delimiter=",")
+y_train_original = np.loadtxt("data/non-linear/0.0Y_train.txt", delimiter=",")
+y_test_original = np.loadtxt("data/non-linear/0.0Y_test.txt", delimiter=",")
 
-n, p = X.shape  # need this to get p 
+n, p = X_train_original.shape  # need this to get p 
 print(n,p,dim)
 
-# Split keep some of the data for validation after training
-X, X_test, y, y_test = train_test_split(
-    X, y, test_size=0.10, random_state=42, stratify=y)
+if class_problem:
+    n_classes = len(np.unique(y_train_original))
+    if n_classes == 2:
+        n_classes = 1
+    multiclass = n_classes > 1
+else: 
+    n_classes = 1  # Just need to set it to something above zero
+    multiclass = False
 
-test_dat = torch.tensor(np.column_stack((X_test,y_test)),dtype = torch.float32)
+BATCH_SIZE = int((n)/50)
+TRAIN_SIZE = int((n))
 
 
+NUM_BATCHES = TRAIN_SIZE/BATCH_SIZE
+
+print(NUM_BATCHES)
+
+train_dat = torch.tensor(np.column_stack((X_train_original,y_train_original)),dtype = torch.float32)
+test_dat = torch.tensor(np.column_stack((X_test_original,y_test_original)),dtype = torch.float32)
+
+tot_rounds = epochs + post_train_epochs
 
 # select the device and initiate model
 
@@ -91,45 +92,38 @@ for ni in range(n_nets):
     alphas = pip_func.get_alphas_numpy(net)
     nr_weights = np.sum([np.prod(a.shape) for a in alphas])
     print(nr_weights)
-    tot_rounds = epochs + post_train_epochs
-    # params = []
-    # for name, param in net.named_parameters():
-    #     if f"lambdal" in name:
-    #         alpha_lr = {'params': param, 'lr': 1.0}
-    #         params.append(alpha_lr)
-    #     else:
-    #         param_lr = {'params': param, 'lr': lr}
-    #         params.append(param_lr)
+    
+    params = []
+    for name, param in net.named_parameters():
+        if f"lambdal" in name:
+            alpha_lr = {'params': param, 'lr': 1.5}
+            params.append(alpha_lr)
+        else:
+            param_lr = {'params': param, 'lr': lr}
+            params.append(param_lr)
 
     # print(params)
-    optimizer = optim.Adam(net.parameters(), lr=lr)
-    # optimizer = optim.Adam(params, lr=lr)
-    scheduler = MultiStepLR(optimizer, milestones=[int(0.5*tot_rounds), int(0.7*tot_rounds)], gamma=0.1)  # Reduce lr as the epochs increases int(0.2*tot_rounds),int(0.4*tot_rounds),int(0.6*tot_rounds),int(0.7*tot_rounds)
+    # optimizer = optim.Adam(net.parameters(), lr=lr)
+    optimizer = optim.Adam(params, lr=lr)
+    scheduler = MultiStepLR(optimizer, milestones=[int(0.5*tot_rounds), int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.5)  # Reduce lr as the epochs increases int(0.2*tot_rounds),int(0.4*tot_rounds),int(0.6*tot_rounds),int(0.7*tot_rounds)
     
     all_nll = []
     all_loss = []
-
-    # Split into training and test set
-    X_train, X_val, y_train, y_val = train_test_split(
-    X, y, test_size=1/9, random_state=ni, stratify=y)
-            
-    train_dat = torch.tensor(np.column_stack((X_train,y_train)),dtype = torch.float32)
-    val_dat = torch.tensor(np.column_stack((X_val,y_val)),dtype = torch.float32)
     
     # Train network
     counter = 0
     highest_acc = 0
     best_model = copy.deepcopy(net)
     for epoch in range(tot_rounds):
-        if epoch < 10:
+        if epoch < 0:
             NUM_BATCHES = 1
         else:
-            NUM_BATCHES = NUM_BATCHES_original
+            NUM_BATCHES = NUM_BATCHES
 
         if verbose:
             print(epoch)
         nll, loss = pip_func.train(net, train_dat, optimizer, BATCH_SIZE, NUM_BATCHES, p, DEVICE, nr_weights, post_train=post_train)
-        nll_val, loss_val, ensemble_val = pip_func.val(net, val_dat, DEVICE, verbose=verbose, reg=(not class_problem))
+        nll_val, loss_val, ensemble_val = pip_func.val(net, test_dat, DEVICE, verbose=verbose, reg=(not class_problem))
         if ensemble_val >= highest_acc:
             counter = 0
             highest_acc = ensemble_val
@@ -154,6 +148,8 @@ for ni in range(n_nets):
         
     all_nets[ni] = net 
     # Results
+    if save_res:
+        torch.save(net, f"implementations/lrt/non_linear_problem/network/net{ni}")
     metrics, metrics_median = pip_func.test_ensemble(all_nets[ni], test_dat, DEVICE, SAMPLES=100, CLASSES=1, reg=(not class_problem)) # Test same data 10 times to get average 
     metrics_several_runs.append(metrics)
     metrics_median_several_runs.append(metrics_median)

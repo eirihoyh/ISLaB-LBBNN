@@ -5,7 +5,7 @@ import torch.nn.functional as F
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class BayesianLinear(nn.Module):
-    def __init__(self, in_features, out_features, lower_init_lambda=0, upper_init_lambda=5, a_prior=0.05, std_prior=2.5):
+    def __init__(self, in_features, out_features, lower_init_lambda=-5, upper_init_lambda=0, a_prior=0.05, std_prior=2.5):
         super().__init__()
         self.in_features = in_features
         self.out_features = out_features
