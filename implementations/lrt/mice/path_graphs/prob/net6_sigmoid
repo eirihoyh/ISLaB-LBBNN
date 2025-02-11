@@ -1,0 +1,219 @@
+strict digraph "All paths!" {
+	I_5
+	Output_1
+	I_5 -> Output_1 [label="α=0.99"]
+	I_8
+	I_8 -> Output_1 [label="α=1.00"]
+	I_9
+	I_9 -> Output_1 [label="α=1.00"]
+	I_12
+	I_12 -> Output_1 [label="α=1.00"]
+	I_13
+	I_13 -> Output_1 [label="α=1.00"]
+	I_17
+	I_17 -> Output_1 [label="α=1.00"]
+	I_18
+	I_18 -> Output_1 [label="α=1.00"]
+	I_20
+	I_20 -> Output_1 [label="α=1.00"]
+	I_25
+	I_25 -> Output_1 [label="α=1.00"]
+	I_27
+	I_27 -> Output_1 [label="α=0.96"]
+	I_31
+	I_31 -> Output_1 [label="α=1.00"]
+	I_33
+	I_33 -> Output_1 [label="α=1.00"]
+	I_34
+	I_34 -> Output_1 [label="α=1.00"]
+	I_40
+	I_40 -> Output_1 [label="α=1.00"]
+	I_42
+	I_42 -> Output_1 [label="α=1.00"]
+	I_45
+	I_45 -> Output_1 [label="α=1.00"]
+	I_52
+	I_52 -> Output_1 [label="α=0.97"]
+	I_53
+	I_53 -> Output_1 [label="α=1.00"]
+	I_56
+	I_56 -> Output_1 [label="α=1.00"]
+	I_59
+	I_59 -> Output_1 [label="α=1.00"]
+	I_64
+	I_64 -> Output_1 [label="α=1.00"]
+	I_67
+	I_67 -> Output_1 [label="α=1.00"]
+	I_72
+	I_72 -> Output_1 [label="α=1.00"]
+	I_7
+	Output_2
+	I_7 -> Output_2 [label="α=1.00"]
+	I_9 -> Output_2 [label="α=0.54"]
+	I_11
+	I_11 -> Output_2 [label="α=0.72"]
+	I_12 -> Output_2 [label="α=1.00"]
+	I_18 -> Output_2 [label="α=1.00"]
+	I_20 -> Output_2 [label="α=1.00"]
+	I_21
+	I_21 -> Output_2 [label="α=1.00"]
+	I_22
+	I_22 -> Output_2 [label="α=1.00"]
+	I_29
+	I_29 -> Output_2 [label="α=1.00"]
+	I_30
+	I_30 -> Output_2 [label="α=1.00"]
+	I_31 -> Output_2 [label="α=1.00"]
+	I_40 -> Output_2 [label="α=1.00"]
+	I_44
+	I_44 -> Output_2 [label="α=1.00"]
+	I_52 -> Output_2 [label="α=0.89"]
+	I_53 -> Output_2 [label="α=1.00"]
+	I_55
+	I_55 -> Output_2 [label="α=0.97"]
+	I_56 -> Output_2 [label="α=1.00"]
+	I_58
+	I_58 -> Output_2 [label="α=1.00"]
+	I_61
+	I_61 -> Output_2 [label="α=1.00"]
+	I_63
+	I_63 -> Output_2 [label="α=1.00"]
+	I_66
+	I_66 -> Output_2 [label="α=1.00"]
+	I_70
+	I_70 -> Output_2 [label="α=0.51"]
+	I_77
+	I_77 -> Output_2 [label="α=0.99"]
+	Output_3
+	I_8 -> Output_3 [label="α=1.00"]
+	I_16
+	I_16 -> Output_3 [label="α=1.00"]
+	I_20 -> Output_3 [label="α=0.82"]
+	I_31 -> Output_3 [label="α=1.00"]
+	I_35
+	I_35 -> Output_3 [label="α=1.00"]
+	I_46
+	I_46 -> Output_3 [label="α=1.00"]
+	I_48
+	I_48 -> Output_3 [label="α=1.00"]
+	I_50
+	I_50 -> Output_3 [label="α=1.00"]
+	I_61 -> Output_3 [label="α=1.00"]
+	I_62
+	I_62 -> Output_3 [label="α=1.00"]
+	I_66 -> Output_3 [label="α=1.00"]
+	I_73
+	I_73 -> Output_3 [label="α=1.00"]
+	I_2
+	Output_4
+	I_2 -> Output_4 [label="α=1.00"]
+	I_4
+	I_4 -> Output_4 [label="α=0.99"]
+	I_5 -> Output_4 [label="α=0.76"]
+	I_15
+	I_15 -> Output_4 [label="α=0.95"]
+	I_20 -> Output_4 [label="α=1.00"]
+	I_26
+	I_26 -> Output_4 [label="α=1.00"]
+	I_33 -> Output_4 [label="α=0.99"]
+	I_34 -> Output_4 [label="α=1.00"]
+	I_37
+	I_37 -> Output_4 [label="α=1.00"]
+	I_40 -> Output_4 [label="α=1.00"]
+	I_42 -> Output_4 [label="α=1.00"]
+	I_45 -> Output_4 [label="α=1.00"]
+	I_51
+	I_51 -> Output_4 [label="α=1.00"]
+	I_61 -> Output_4 [label="α=1.00"]
+	I_73 -> Output_4 [label="α=0.84"]
+	I_74
+	I_74 -> Output_4 [label="α=0.75"]
+	Output_5
+	I_2 -> Output_5 [label="α=1.00"]
+	I_8 -> Output_5 [label="α=1.00"]
+	I_20 -> Output_5 [label="α=1.00"]
+	I_22 -> Output_5 [label="α=1.00"]
+	I_25 -> Output_5 [label="α=1.00"]
+	I_29 -> Output_5 [label="α=1.00"]
+	I_31 -> Output_5 [label="α=1.00"]
+	I_33 -> Output_5 [label="α=1.00"]
+	I_34 -> Output_5 [label="α=1.00"]
+	I_37 -> Output_5 [label="α=0.99"]
+	I_41
+	I_41 -> Output_5 [label="α=0.99"]
+	I_46 -> Output_5 [label="α=0.94"]
+	I_47
+	I_47 -> Output_5 [label="α=1.00"]
+	I_52 -> Output_5 [label="α=0.78"]
+	I_57
+	I_57 -> Output_5 [label="α=0.61"]
+	I_63 -> Output_5 [label="α=1.00"]
+	I_77 -> Output_5 [label="α=1.00"]
+	I_3
+	Output_6
+	I_3 -> Output_6 [label="α=1.00"]
+	I_8 -> Output_6 [label="α=1.00"]
+	I_12 -> Output_6 [label="α=0.98"]
+	I_17 -> Output_6 [label="α=1.00"]
+	I_23
+	I_23 -> Output_6 [label="α=0.90"]
+	I_31 -> Output_6 [label="α=1.00"]
+	I_32
+	I_32 -> Output_6 [label="α=1.00"]
+	I_35 -> Output_6 [label="α=1.00"]
+	I_38
+	I_38 -> Output_6 [label="α=1.00"]
+	I_39
+	I_39 -> Output_6 [label="α=1.00"]
+	I_42 -> Output_6 [label="α=0.96"]
+	I_44 -> Output_6 [label="α=1.00"]
+	I_49
+	I_49 -> Output_6 [label="α=1.00"]
+	I_59 -> Output_6 [label="α=1.00"]
+	I_60
+	I_60 -> Output_6 [label="α=1.00"]
+	I_66 -> Output_6 [label="α=0.99"]
+	Output_7
+	I_3 -> Output_7 [label="α=1.00"]
+	I_6
+	I_6 -> Output_7 [label="α=1.00"]
+	I_18 -> Output_7 [label="α=1.00"]
+	I_22 -> Output_7 [label="α=1.00"]
+	I_24
+	I_24 -> Output_7 [label="α=0.69"]
+	I_25 -> Output_7 [label="α=1.00"]
+	I_31 -> Output_7 [label="α=1.00"]
+	I_33 -> Output_7 [label="α=1.00"]
+	I_34 -> Output_7 [label="α=1.00"]
+	I_36
+	I_36 -> Output_7 [label="α=0.97"]
+	I_42 -> Output_7 [label="α=1.00"]
+	I_43
+	I_43 -> Output_7 [label="α=1.00"]
+	I_46 -> Output_7 [label="α=1.00"]
+	I_51 -> Output_7 [label="α=1.00"]
+	I_55 -> Output_7 [label="α=1.00"]
+	I_62 -> Output_7 [label="α=1.00"]
+	I_63 -> Output_7 [label="α=1.00"]
+	I_64 -> Output_7 [label="α=0.98"]
+	I_65
+	I_65 -> Output_7 [label="α=0.89"]
+	I_71
+	I_71 -> Output_7 [label="α=0.97"]
+	I_72 -> Output_7 [label="α=0.93"]
+	I_73 -> Output_7 [label="α=1.00"]
+	I_77 -> Output_7 [label="α=1.00"]
+	Output_8
+	I_11 -> Output_8 [label="α=1.00"]
+	I_16 -> Output_8 [label="α=1.00"]
+	I_18 -> Output_8 [label="α=0.93"]
+	I_21 -> Output_8 [label="α=0.98"]
+	I_32 -> Output_8 [label="α=1.00"]
+	I_33 -> Output_8 [label="α=1.00"]
+	I_42 -> Output_8 [label="α=1.00"]
+	I_47 -> Output_8 [label="α=1.00"]
+	I_67 -> Output_8 [label="α=0.85"]
+	I_69
+	I_69 -> Output_8 [label="α=0.66"]
+	"All paths" [shape=Msquare]
+}
