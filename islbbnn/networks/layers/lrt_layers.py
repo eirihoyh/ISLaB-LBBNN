@@ -5,7 +5,7 @@ import torch.nn.functional as F
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class BayesianLinear(nn.Module):
-    def __init__(self, in_features, out_features, lower_init_lambda=-5, upper_init_lambda=0, a_prior=0.05, std_prior=2.5):
+    def __init__(self, in_features, out_features, lower_init_lambda=-10, upper_init_lambda=-8, a_prior=0.1, std_prior=2.5, p=None):
         super().__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -22,6 +22,10 @@ class BayesianLinear(nn.Module):
         # model variational parameters
         self.lambdal = nn.Parameter(torch.Tensor(out_features, in_features).uniform_(lower_init_lambda, upper_init_lambda))
         self.alpha = torch.empty(size=self.lambdal.shape)
+
+        # If defined, give a high initial value for including covariates
+        if p!=None:
+            self.lambdal[:,-p:] = 10
 
         # model priors = Bernoulli(0.10)
         self.alpha_prior =  torch.zeros(out_features, in_features, device=DEVICE) + a_prior

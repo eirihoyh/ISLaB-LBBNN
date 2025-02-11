@@ -4,7 +4,19 @@ import torch.nn.functional as F
 from layers.lrt_layers import BayesianLinear
 
 class BayesianNetwork(nn.Module):
-    def __init__(self, dim, p, hidden_layers, a_prior=0.05, std_prior=2.5, classification=True, n_classes=1, act_func=F.sigmoid):
+    def __init__(
+            self, 
+            dim, 
+            p, 
+            hidden_layers, 
+            a_prior=0.05, 
+            std_prior=2.5, 
+            classification=True, 
+            n_classes=1, 
+            act_func=F.sigmoid, 
+            lower_init_lambda=-10, 
+            upper_init_lambda=-8,
+            high_init_covariate_prob=False):
         '''
         TODO: Add option to select perfered loss self wanting to test another loss type 
         '''
@@ -13,10 +25,14 @@ class BayesianNetwork(nn.Module):
         self.classification = classification
         self.multiclass = n_classes > 1
         self.act = act_func
+        if high_init_covariate_prob:
+            nr_var = p
+        else:
+            nr_var = None
         # set the architecture
-        self.linears = nn.ModuleList([BayesianLinear(p, dim, a_prior=a_prior, std_prior=std_prior)])
-        self.linears.extend([BayesianLinear((dim+p), (dim), a_prior=a_prior, std_prior=std_prior) for _ in range(hidden_layers-1)])
-        self.linears.append(BayesianLinear((dim+p), n_classes, a_prior=a_prior, std_prior=std_prior))
+        self.linears = nn.ModuleList([BayesianLinear(p, dim, a_prior=a_prior, std_prior=std_prior, lower_init_lambda=lower_init_lambda, upper_init_lambda=upper_init_lambda, p=nr_var)])
+        self.linears.extend([BayesianLinear((dim+p), (dim), a_prior=a_prior, std_prior=std_prior, lower_init_lambda=lower_init_lambda, upper_init_lambda=upper_init_lambda, p=nr_var) for _ in range(hidden_layers-1)])
+        self.linears.append(BayesianLinear((dim+p), n_classes, a_prior=a_prior, std_prior=std_prior, lower_init_lambda=lower_init_lambda, upper_init_lambda=upper_init_lambda, p=nr_var))
         if classification:
             if not self.multiclass: 
                 self.loss = nn.BCELoss(reduction='sum') # Setup loss (Binary cross entropy as binary classification)
