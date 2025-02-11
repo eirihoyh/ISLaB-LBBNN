@@ -20,12 +20,13 @@ class BayesianLinear(nn.Module):
         self.sigma_prior = (self.mu_prior+std_prior).to(DEVICE)
         
         # model variational parameters
+        init_lambda = torch.Tensor(out_features, in_features).uniform_(lower_init_lambda, upper_init_lambda)
+        # If defined, give a high initial value for including covariates
+        if p!=None:
+            init_lambda[:,-p:] = 10
         self.lambdal = nn.Parameter(torch.Tensor(out_features, in_features).uniform_(lower_init_lambda, upper_init_lambda))
         self.alpha = torch.empty(size=self.lambdal.shape)
 
-        # If defined, give a high initial value for including covariates
-        if p!=None:
-            self.lambdal[:,-p:] = 10
 
         # model priors = Bernoulli(0.10)
         self.alpha_prior =  torch.zeros(out_features, in_features, device=DEVICE) + a_prior
