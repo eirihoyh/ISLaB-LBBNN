@@ -15,7 +15,7 @@ class BayesianNetwork(nn.Module):
             n_classes=1, 
             act_func=F.sigmoid, 
             lower_init_lambda=-10, 
-            upper_init_lambda=-8,
+            upper_init_lambda=-7,
             high_init_covariate_prob=False):
         '''
         TODO: Add option to select perfered loss self wanting to test another loss type 
