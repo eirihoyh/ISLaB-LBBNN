@@ -45,10 +45,10 @@ for dep in dep_levels:
 
 
     # Get linear data
-    X_train_original = np.loadtxt("data/linear/0.0X_train.txt", delimiter=",")
-    X_test_original = np.loadtxt("data/linear/0.0X_test.txt", delimiter=",")
-    y_train_original = np.loadtxt("data/linear/0.0Y_train.txt", delimiter=",")
-    y_test_original = np.loadtxt("data/linear/0.0Y_test.txt", delimiter=",")
+    X_train_original = np.loadtxt(f"data/linear/{dep}X_train.txt", delimiter=",")
+    X_test_original = np.loadtxt(f"data/linear/{dep}X_test.txt", delimiter=",")
+    y_train_original = np.loadtxt(f"data/linear/{dep}Y_train.txt", delimiter=",")
+    y_test_original = np.loadtxt(f"data/linear/{dep}Y_test.txt", delimiter=",")
 
     n, p = X_train_original.shape  # need this to get p 
     print(n,p,dim)

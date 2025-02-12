@@ -14,8 +14,8 @@ config['class_problem'] = True  # If classification problem or not
 config['inclusion_prob_prior'] = 0.001
 config['std_prior'] = 2.5
 config['lower_init_lambda'] = -10
-config['upper_init_lambda'] = -8
-config['high_init_covariate_prob'] = True
+config['upper_init_lambda'] = -7
+config['high_init_covariate_prob'] = True  # If true, the inital covariate probs for the covariates will be set to lambda=5
 # For the linear and non-linear problem
 config['n_samples'] = 4*10**4
 config['non_lin'] = False  # Wanting to create a non-linear or linear dataset 
