@@ -13,10 +13,12 @@ config['num_transforms'] = 2  # For normalizing flows
 config['class_problem'] = False  # If classification problem or not
 config['inclusion_prob_prior'] = 0.4
 config['std_prior'] = 25.
+config['lower_init_lambda'] = -9
+config['upper_init_lambda'] = -4
+config['high_init_covariate_prob'] = True # If true, the inital covariate probs for the covariates will be set to lambda=5
 # For the linear and non-linear problem
 config['n_samples'] = 4*10**4
 config['non_lin'] = True  # Wanting to create a non-linear or linear dataset 
-config['test_samples'] = 5000
 
 config['verbose'] = True  # If we want printouts during/after training or not
 config['save_res'] = True  # If we should save the results

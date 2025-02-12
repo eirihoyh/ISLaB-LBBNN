@@ -47,6 +47,9 @@ save_res = config['save_res']
 patience = config['patience']
 alpha_prior = config['inclusion_prob_prior']
 std_prior = config['std_prior']
+lower_init_lambda = config['lower_init_lambda']
+upper_init_lambda = config['upper_init_lambda']
+high_init_covariate_prob = config['high_init_covariate_prob']
 
 
 
@@ -91,7 +94,18 @@ for ni in range(n_nets):
     print('network', ni)
     # Initate network
     torch.manual_seed(ni+42)
-    net = BayesianNetwork(dim, p, HIDDEN_LAYERS, classification=class_problem, a_prior=alpha_prior, std_prior=std_prior, n_classes=n_classes).to(DEVICE)
+    net = BayesianNetwork(
+        dim, 
+        p, 
+        HIDDEN_LAYERS, 
+        classification=class_problem, 
+        a_prior=alpha_prior, 
+        std_prior=std_prior, 
+        n_classes=n_classes, 
+        act_func=F.sigmoid,
+        lower_init_lambda=lower_init_lambda,
+        upper_init_lambda=upper_init_lambda,
+        high_init_covariate_prob=high_init_covariate_prob).to(DEVICE)
     alphas = pip_func.get_alphas_numpy(net)
     nr_weights = np.sum([np.prod(a.shape) for a in alphas])
     print(nr_weights)
