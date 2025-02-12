@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 config = {}
-config['num_epochs' ] = 2000  
-config['lr'] = .005
+config['num_epochs' ] = 5000  
+config['lr'] = .01
 config['post_train_epochs'] = 0  # If post training, then only MPM will be trained
 config['patience'] = 10000
 config['n_nets'] = 10  # Number of different networks to run for one problem
@@ -11,7 +11,7 @@ config['n_layers'] = 2+2 # Two hidden + (one input+one output)
 config['hidden_dim'] = 200 # Number of hidden nodes per layer
 config['num_transforms'] = 2  # For normalizing flows
 config['class_problem'] = False  # If classification problem or not
-config['inclusion_prob_prior'] = 0.4
+config['inclusion_prob_prior'] = 0.25
 config['std_prior'] = 25.
 config['lower_init_lambda'] = -9
 config['upper_init_lambda'] = -4

@@ -112,7 +112,7 @@ for ni in range(n_nets):
 
     optimizer = optim.Adam(net.parameters(), lr=lr)
     
-    scheduler = MultiStepLR(optimizer, milestones=[int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.5)
+    scheduler = MultiStepLR(optimizer, milestones=[int(0.3*tot_rounds), int(0.5*tot_rounds), int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.5)
 
     all_nll = []
     all_loss = []
