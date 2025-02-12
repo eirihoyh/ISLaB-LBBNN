@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# NOTE: Used lambda min=-3 and lambda max=-1
+# NOTE: Used lambda min=5 and lambda max=15
 config = {}
-config['num_epochs' ] = 0 # 5000  
+config['num_epochs' ] = 5000  
 config['lr'] = .01
-config['post_train_epochs'] = 300 #0  # If post training, then only MPM will be trained
+config['post_train_epochs'] = 0  # If post training, then only MPM will be trained
 config['patience'] = 10000
 config['n_nets'] = 10  # Number of different networks to run for one problem
 config['n_layers'] = 2+2 # Two hidden + (one input+one output)

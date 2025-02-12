@@ -6,7 +6,7 @@ import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 from sklearn.model_selection import train_test_split
-from config import config
+from config_dense_init import config
 import os
 import sys
 current_dir = os.getcwd()
@@ -75,7 +75,7 @@ print(n,p,dim)
 n_classes = len(np.unique(y_train_original))
 multiclass = n_classes > 1
 
-BATCH_SIZE = int((n)/10)
+BATCH_SIZE = int((n)/50)
 # TEST_BATCH_SIZE = int(n*0.10) # Would normally call this the "validation" part (will be used during training)
 # VAL_BATCH_SIZE = int(n*0.10) # and this the "test" part (will be used after training)
 
@@ -169,7 +169,7 @@ for ni in range(n_nets):
     all_nets[ni] = net 
     # Results
     if save_res:
-        torch.save(net, f"implementations/lrt/MNIST/network/net{ni}")
+        torch.save(net, f"implementations/lrt/MNIST/network/net{ni}_dense_init")
     metrics, metrics_median = pip_func.test_ensemble(all_nets[ni], test_dat, DEVICE, SAMPLES=100, CLASSES=n_classes, reg=(not class_problem), multiclass=multiclass) # Test same data 10 times to get average 
     metrics_several_runs.append(metrics)
     metrics_median_several_runs.append(metrics_median)
@@ -186,6 +186,6 @@ print(m_median)
 
 if save_res:
     # m = np.array(metrics_several_runs)
-    np.savetxt(f'implementations/lrt/MNIST/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_mnist_sigmoid_full.txt',m,delimiter = ',')
+    np.savetxt(f'implementations/lrt/MNIST/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_mnist_sigmoid_dense_init_full.txt',m,delimiter = ',')
     # m_median = np.array(metrics_median_several_runs)
-    np.savetxt(f'implementations/lrt/MNIST/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_mnist_sigmoid_median.txt',m_median,delimiter = ',')
+    np.savetxt(f'implementations/lrt/MNIST/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_mnist_sigmoid_dense_init_median.txt',m_median,delimiter = ',')
