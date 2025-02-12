@@ -1,0 +1,44 @@
+strict digraph "All paths!" {
+	I_1
+	H3_1
+	I_1 -> H3_1 [label="w=0.83"]
+	I_2
+	H3_3
+	I_2 -> H3_3 [label="w=-0.51"]
+	H3_4
+	I_2 -> H3_4 [label="w=-0.92"]
+	H3_15
+	I_2 -> H3_15 [label="w=-0.84"]
+	H3_16
+	I_2 -> H3_16 [label="w=1.25"]
+	H4_1
+	H3_1 -> H4_1 [label="w=1.20"]
+	H3_3 -> H4_1 [label="w=7.36"]
+	I_1 -> H4_1 [label="w=-1.59"]
+	I_2 -> H4_1 [label="w=0.85"]
+	H4_8
+	H3_1 -> H4_8 [label="w=-14.40"]
+	H3_3 -> H4_8 [label="w=10.02"]
+	H3_15 -> H4_8 [label="w=-4.61"]
+	H3_16 -> H4_8 [label="w=0.67"]
+	I_1 -> H4_8 [label="w=0.93"]
+	I_2 -> H4_8 [label="w=2.07"]
+	H4_10
+	H3_1 -> H4_10 [label="w=-10.73"]
+	H3_4 -> H4_10 [label="w=-7.33"]
+	I_1 -> H4_10 [label="w=-1.07"]
+	I_2 -> H4_10 [label="w=-1.84"]
+	H4_14
+	H3_1 -> H4_14 [label="w=2.96"]
+	H3_3 -> H4_14 [label="w=-11.39"]
+	H3_16 -> H4_14 [label="w=-10.40"]
+	I_1 -> H4_14 [label="w=1.44"]
+	I_2 -> H4_14 [label="w=0.01"]
+	Output_1
+	H4_1 -> Output_1 [label="w=-16.05"]
+	H4_8 -> Output_1 [label="w=31.27"]
+	H4_10 -> Output_1 [label="w=31.25"]
+	H4_14 -> Output_1 [label="w=30.79"]
+	I_1 -> Output_1 [label="w=-1.05"]
+	"All paths" [shape=Msquare]
+}
