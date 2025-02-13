@@ -161,7 +161,7 @@ for ni in range(n_nets):
     metrics_several_runs.append(metrics)
     metrics_median_several_runs.append(metrics_median)
     pf.run_path_graph(all_nets[ni], threshold=0.5, save_path=f"implementations/flow/mice/path_graphs/prob/net{ni}_sigmoid", show=False)
-    pf.run_path_graph_weight(net, save_path=f"implementations/flow/mice/path_graphs/weight/net{ni}_sigmoid", show=False)
+    pf.run_path_graph_weight(net, save_path=f"implementations/flow/mice/path_graphs/weight/net{ni}_sigmoid", show=False, flow=True) # NOTE: Forgot to run with flow=True
 
 if verbose:
     print(metrics)
