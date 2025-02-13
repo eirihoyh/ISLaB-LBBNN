@@ -148,7 +148,7 @@ def z_matrices_numpy(net):
     '''
     z = z_matrices(net)
     for i in range(len(z)):
-        z[i] = z[i].detach().numpy()
+        z[i] = z[i].cpu().detach().numpy()
 
     return z
 
