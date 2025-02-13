@@ -1,0 +1,23 @@
+strict digraph "All paths!" {
+	I_1
+	H1_5
+	I_1 -> H1_5 [label="w=0.30"]
+	I_2
+	I_2 -> H1_5 [label="w=0.31"]
+	H2_10
+	H1_5 -> H2_10 [label="w=17.49"]
+	H3_4
+	H2_10 -> H3_4 [label="w=9.88"]
+	H3_10
+	I_1 -> H3_10 [label="w=0.37"]
+	H3_12
+	H2_10 -> H3_12 [label="w=8.18"]
+	H4_8
+	H3_4 -> H4_8 [label="w=-0.41"]
+	H3_10 -> H4_8 [label="w=2.99"]
+	H3_12 -> H4_8 [label="w=-7.55"]
+	Output_1
+	H4_8 -> Output_1 [label="w=-21.07"]
+	I_2 -> Output_1 [label="w=-0.38"]
+	"All paths" [shape=Msquare]
+}
