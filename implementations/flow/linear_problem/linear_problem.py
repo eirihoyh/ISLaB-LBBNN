@@ -62,7 +62,7 @@ for dep in dep_levels:
         n_classes = 1  # Just need to set it to something above zero
         multiclass = False
 
-    BATCH_SIZE = int((n)/20)
+    BATCH_SIZE = int((n)/10)
     TRAIN_SIZE = int((n))
 
 
@@ -105,18 +105,18 @@ for dep in dep_levels:
         nr_weights = np.sum([np.prod(a.shape) for a in alphas])
         print(nr_weights)
 
-        params = []
-        for name, param in net.named_parameters():
-            if f"lambdal" in name:
-                alpha_lr = {'params': param, 'lr': 1.5}
-                params.append(alpha_lr)
-            else:
-                param_lr = {'params': param, 'lr': lr}
-                params.append(param_lr)
+        # params = []
+        # for name, param in net.named_parameters():
+        #     if f"lambdal" in name:
+        #         alpha_lr = {'params': param, 'lr': 0.5}
+        #         params.append(alpha_lr)
+        #     else:
+        #         param_lr = {'params': param, 'lr': lr}
+        #         params.append(param_lr)
 
-        # print(params)
-        optimizer = optim.Adam(net.parameters(), lr=lr)
+        # # print(params)
         # optimizer = optim.Adam(params, lr=lr)
+        optimizer = optim.Adam(net.parameters(), lr=lr)
         
         scheduler = MultiStepLR(optimizer, milestones=[int(0.5*tot_rounds), int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.5)
 

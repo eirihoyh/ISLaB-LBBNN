@@ -3,7 +3,7 @@
 # NOTE: Used lambda min=-10 and lambda max=-7, but had high init prob of including painput params
 config = {}
 config['num_epochs' ] = 200  
-config['lr'] = .1
+config['lr'] = .01
 config['post_train_epochs'] = 0  # If post training, then only MPM will be trained
 config['patience'] = 10000
 config['n_nets'] = 10  # Number of different networks to run for one problem
