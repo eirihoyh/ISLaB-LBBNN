@@ -19,7 +19,16 @@ else:
     print("CPUs are used!")
 
 class BayesianLinear(nn.Module):
-    def __init__(self, in_features, out_features, num_transforms, lower_init_lambda=2, upper_init_lambda=10, a_prior=0.1):
+    def __init__(
+            self, 
+            in_features, 
+            out_features, 
+            num_transforms, 
+            lower_init_lambda=-10, 
+            upper_init_lambda=-7, 
+            a_prior=0.1, 
+            std_prior=2.5, 
+            p=None):
         super().__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -31,14 +40,18 @@ class BayesianLinear(nn.Module):
 
         # prior distribution on all weights is N(0,1)
         self.mu_prior = torch.zeros(out_features, in_features, device=DEVICE)
-        self.sigma_prior = (self.mu_prior + 20.).to(DEVICE)
+        self.sigma_prior = (self.mu_prior + std_prior).to(DEVICE)
 
         # initialize the posterior inclusion probability. Here we must have alpha in (0,1)
-        self.lambdal = nn.Parameter(torch.Tensor(out_features, in_features).uniform_(lower_init_lambda, upper_init_lambda))
+        init_lambda = torch.Tensor(out_features, in_features).uniform_(lower_init_lambda, upper_init_lambda)
+        # If defined, give a high initial value for including covariates
+        if p!=None:
+            init_lambda[:,-p:] = 5
+        self.lambdal = nn.Parameter(init_lambda)
         self.alpha = torch.empty(size=self.lambdal.shape)
 
         # 
-        self.alpha_prior = (self.mu_prior + a_prior).to(DEVICE)
+        self.alpha_prior = (self.mu_prior + a_prior).to(DEVICE) + a_prior
         # initialize the bias parameter
 
         self.bias_mu = nn.Parameter(torch.Tensor(out_features).uniform_(-0.2, 0.2))
@@ -47,7 +60,7 @@ class BayesianLinear(nn.Module):
 
         # bias priors = N(0,1)
         self.bias_mu_prior = torch.zeros(out_features, device=DEVICE)
-        self.bias_sigma_prior = (self.bias_mu_prior + 10.).to(DEVICE)
+        self.bias_sigma_prior = (self.bias_mu_prior + std_prior).to(DEVICE)
 
         # z variational parameters
         self.q0_mean = nn.Parameter(1 * torch.randn(in_features))
