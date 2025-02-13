@@ -1,0 +1,54 @@
+strict digraph "All paths!" {
+	I_35
+	Output_1
+	I_35 -> Output_1 [label="w=0.71"]
+	I_1599
+	I_1599 -> Output_1 [label="w=-1.92"]
+	I_1600
+	I_1600 -> Output_1 [label="w=-0.48"]
+	I_1648
+	I_1648 -> Output_1 [label="w=-1.07"]
+	I_1665
+	I_1665 -> Output_1 [label="w=-1.72"]
+	I_1666
+	I_1666 -> Output_1 [label="w=-1.44"]
+	I_1851
+	I_1851 -> Output_1 [label="w=1.25"]
+	I_1897
+	I_1897 -> Output_1 [label="w=0.33"]
+	I_1941
+	I_1941 -> Output_1 [label="w=1.49"]
+	I_49
+	Output_2
+	I_49 -> Output_2 [label="w=0.81"]
+	I_192
+	I_192 -> Output_2 [label="w=0.59"]
+	I_792
+	I_792 -> Output_2 [label="w=1.92"]
+	I_1745
+	I_1745 -> Output_2 [label="w=1.34"]
+	I_1848
+	I_1848 -> Output_2 [label="w=-1.60"]
+	I_1943
+	I_1943 -> Output_2 [label="w=-0.65"]
+	I_1945
+	I_1945 -> Output_2 [label="w=-0.69"]
+	I_1992
+	I_1992 -> Output_2 [label="w=-0.80"]
+	I_1995
+	I_1995 -> Output_2 [label="w=-1.59"]
+	I_2247
+	I_2247 -> Output_2 [label="w=0.78"]
+	I_685
+	Output_3
+	I_685 -> Output_3 [label="w=-0.72"]
+	I_797
+	I_797 -> Output_3 [label="w=-1.17"]
+	I_874
+	I_874 -> Output_3 [label="w=-0.44"]
+	I_2225
+	I_2225 -> Output_3 [label="w=-0.77"]
+	I_2286
+	I_2286 -> Output_3 [label="w=-1.39"]
+	"All paths" [shape=Msquare]
+}
