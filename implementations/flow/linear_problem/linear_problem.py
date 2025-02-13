@@ -165,7 +165,7 @@ for dep in dep_levels:
         metrics_several_runs.append(metrics)
         metrics_median_several_runs.append(metrics_median)
         pf.run_path_graph(all_nets[ni], threshold=0.5, save_path=f"implementations/flow/linear_problem/path_graphs/prob/net{ni}_dep_level_{int(dep*100)}_sigmoid", show=False)
-        pf.run_path_graph_weight(net, save_path=f"implementations/flow/linear_problem/path_graphs/weight/net{ni}_dep_level_{int(dep*100)}_sigmoid", show=False)
+        pf.run_path_graph_weight(net, save_path=f"implementations/flow/linear_problem/path_graphs/weight/net{ni}_dep_level_{int(dep*100)}_sigmoid", show=False, flow=True)
 
     if verbose:
         print(metrics)
