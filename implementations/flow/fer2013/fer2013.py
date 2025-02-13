@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+import pandas as pd
 import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
@@ -17,6 +18,16 @@ from flow_net import BayesianNetwork
 import torch.nn.functional as F
 
 os.chdir(current_dir) # set the working directory back to this one 
+
+# select the device
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+LOADER_KWARGS = {'num_workers': 1, 'pin_memory': True} if torch.cuda.is_available() else {}
+# cuda = torch.cuda.set_device(0)
+
+if (torch.cuda.is_available()):
+    print("GPUs are used!")
+else:
+    print("CPUs are used!")
 
 
 # define parameters
@@ -39,25 +50,36 @@ lower_init_lambda = config['lower_init_lambda']
 upper_init_lambda = config['upper_init_lambda']
 high_init_covariate_prob = config['high_init_covariate_prob']
 
-# Get data
-X_train_original = np.loadtxt(f"data/WBC/X_train.txt", delimiter=",")
-X_test_original = np.loadtxt(f"data/WBC/X_test.txt", delimiter=",")
-y_train_original = np.loadtxt(f"data/WBC/Y_train.txt", delimiter=",")
-y_test_original = np.loadtxt(f"data/WBC/Y_test.txt", delimiter=",")
 
-n, p = X_train_original.shape  # need this to get p 
+
+X_train1_original_csv = pd.read_csv("data/fer2013/X_train1.csv").pixels.values
+X_train1_original = np.array(list(map(lambda x: x.split(" "), X_train1_original_csv))).astype(np.float32)/255.
+
+X_train2_original_csv = pd.read_csv("data/fer2013/X_train2.csv").pixels.values
+X_train2_original = np.array(list(map(lambda x: x.split(" "), X_train2_original_csv))).astype(np.float32)/255.
+
+X_train_original = np.concatenate((X_train1_original, X_train2_original),0)
+
+X_test_original_csv = pd.read_csv("data/fer2013/X_test.csv").pixels.values
+X_test_original = np.array(list(map(lambda x: x.split(" "), X_test_original_csv))).astype(np.float32)/255.
+
+y_train_original = np.loadtxt("data/fer2013/y_train.txt", delimiter=",")
+y_test_original = np.loadtxt("data/fer2013/y_test.txt", delimiter=",")
+
+n,p = X_train_original.shape
 print(n,p,dim)
 
 if class_problem:
     n_classes = len(np.unique(y_train_original))
-    if n_classes == 2:
-        n_classes = 1
     multiclass = n_classes > 1
 else: 
     n_classes = 1  # Just need to set it to something above zero
     multiclass = False
 
-BATCH_SIZE = int((n)/8)
+BATCH_SIZE = int((n)/10)
+# TEST_BATCH_SIZE = int(n*0.10) # Would normally call this the "validation" part (will be used during training)
+# VAL_BATCH_SIZE = int(n*0.10) # and this the "test" part (will be used after training)
+
 TRAIN_SIZE = int((n))
 
 
@@ -65,16 +87,13 @@ NUM_BATCHES = TRAIN_SIZE/BATCH_SIZE
 
 print(NUM_BATCHES)
 
-train_dat = torch.tensor(np.column_stack((X_train_original,y_train_original)),dtype = torch.float32)
+# assert (TRAIN_SIZE % BATCH_SIZE) == 0
+
+
 test_dat = torch.tensor(np.column_stack((X_test_original,y_test_original)),dtype = torch.float32)
 
 tot_rounds = epochs + post_train_epochs
 
-# select the device and initiate model
-
-# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "mps")
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-LOADER_KWARGS = {'num_workers': 1, 'pin_memory': True} if torch.cuda.is_available() else {}
 all_nets = {}
 metrics_several_runs = []
 metrics_median_several_runs = []
@@ -83,8 +102,6 @@ for ni in range(n_nets):
     print('network', ni)
     # Initate network
     torch.manual_seed(ni+42)
-    #---------------------------
-    # DIFFERENCE IS IN act_func=F.relu part
     net = BayesianNetwork(
         dim, 
         p, 
@@ -92,21 +109,21 @@ for ni in range(n_nets):
         classification=class_problem, 
         a_prior=alpha_prior, 
         std_prior=std_prior, 
-        n_classes=n_classes,
+        n_classes=n_classes, 
         num_transforms=num_transforms, 
         act_func=F.sigmoid,
         lower_init_lambda=lower_init_lambda,
         upper_init_lambda=upper_init_lambda,
         high_init_covariate_prob=high_init_covariate_prob).to(DEVICE)
-    #---------------------------
     alphas = pip_func.get_alphas_numpy(net)
     nr_weights = np.sum([np.prod(a.shape) for a in alphas])
     print(nr_weights)
-    
+
+
     # params = []
     # for name, param in net.named_parameters():
     #     if f"lambdal" in name:
-    #         alpha_lr = {'params': param, 'lr': .1}
+    #         alpha_lr = {'params': param, 'lr': 1.5}
     #         params.append(alpha_lr)
     #     else:
     #         param_lr = {'params': param, 'lr': lr}
@@ -116,25 +133,22 @@ for ni in range(n_nets):
     # optimizer = optim.Adam(params, lr=lr)
     optimizer = optim.Adam(net.parameters(), lr=lr)
     
-    scheduler = MultiStepLR(optimizer, milestones=[int(0.5*tot_rounds), int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.5)  # Reduce lr as the epochs increases int(0.2*tot_rounds),int(0.4*tot_rounds),int(0.6*tot_rounds),int(0.7*tot_rounds)
-    
+    scheduler = MultiStepLR(optimizer, milestones=[int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.5)
+
     all_nll = []
     all_loss = []
+            
+    train_dat = torch.tensor(np.column_stack((X_train_original,y_train_original)),dtype = torch.float32)
     
     # Train network
     counter = 0
     highest_acc = 0
     best_model = copy.deepcopy(net)
     for epoch in range(tot_rounds):
-        if epoch < 0:
-            NUM_BATCHES = 1
-        else:
-            NUM_BATCHES = NUM_BATCHES
-
         if verbose:
             print(epoch)
-        nll, loss = pip_func.train(net, train_dat, optimizer, BATCH_SIZE, NUM_BATCHES, p, DEVICE, nr_weights, post_train=post_train)
-        nll_val, loss_val, ensemble_val = pip_func.val(net, test_dat, DEVICE, verbose=verbose, reg=(not class_problem))
+        nll, loss = pip_func.train(net, train_dat, optimizer, BATCH_SIZE, NUM_BATCHES, p, DEVICE, nr_weights, post_train=post_train, multiclass=multiclass)
+        nll_val, loss_val, ensemble_val = pip_func.val(net, test_dat, DEVICE, verbose=verbose, reg=(not class_problem), multiclass=multiclass)
         if ensemble_val >= highest_acc:
             counter = 0
             highest_acc = ensemble_val
@@ -149,6 +163,7 @@ for ni in range(n_nets):
             post_train = True   # Post-train --> use median model 
             for name, param in net.named_parameters():
                 for i in range(HIDDEN_LAYERS+1):
+                    #if f"linears{i}.lambdal" in name:
                     if f"linears.{i}.lambdal" in name:
                         param.requires_grad_(False)
 
@@ -157,15 +172,16 @@ for ni in range(n_nets):
 
         scheduler.step()
         
+    if save_res:
+        torch.save(net, f"implementations/flow/fer2013/network/net{ni}")
     all_nets[ni] = net 
     # Results
-    if save_res:
-        torch.save(net, f"implementations/flow/WBC/network/net{ni}")
-    metrics, metrics_median = pip_func.test_ensemble(all_nets[ni], test_dat, DEVICE, SAMPLES=100, CLASSES=1, reg=(not class_problem)) # Test same data 10 times to get average 
+    metrics, metrics_median = pip_func.test_ensemble(all_nets[ni], test_dat, DEVICE, SAMPLES=100, CLASSES=n_classes, reg=(not class_problem), multiclass=multiclass) # Test same data 10 times to get average 
     metrics_several_runs.append(metrics)
     metrics_median_several_runs.append(metrics_median)
-    pf.run_path_graph(all_nets[ni], threshold=0.5, save_path=f"implementations/flow/WBC/path_graphs/prob/net{ni}_sigmoid", show=False)
-    pf.run_path_graph_weight(net, save_path=f"implementations/flow/WBC/path_graphs/weight/net{ni}_sigmoid", show=False, flow=True)
+    pf.run_path_graph(all_nets[ni], threshold=0.5, save_path=f"implementations/flow/fer2013/path_graphs/prob/net{ni}_sigmoid", show=False)
+    pf.run_path_graph_weight(net, save_path=f"implementations/flow/fer2013/path_graphs/weight/net{ni}_sigmoid", show=False, flow=True)
+
 
 if verbose:
     print(metrics)
@@ -179,6 +195,6 @@ print(m_median)
 
 if save_res:
     # m = np.array(metrics_several_runs)
-    np.savetxt(f'implementations/flow/WBC/results/flow_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_WBC_sigmoid_full.txt',m,delimiter = ',')
+    np.savetxt(f'implementations/flow/fer2013/results/flow_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_fer2013_sigmoid_full.txt',m,delimiter = ',')
     # m_median = np.array(metrics_median_several_runs)
-    np.savetxt(f'implementations/flow/WBC/results/flow_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_WBC_sigmoid_median.txt',m_median,delimiter = ',')
+    np.savetxt(f'implementations/flow/fer2013/results/flow_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_fer2013_sigmoid_median.txt',m_median,delimiter = ',')
