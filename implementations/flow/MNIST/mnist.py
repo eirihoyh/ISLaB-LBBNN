@@ -126,7 +126,7 @@ for ni in range(n_nets):
     params = []
     for name, param in net.named_parameters():
         if f"lambdal" in name:
-            alpha_lr = {'params': param, 'lr': 0.1}
+            alpha_lr = {'params': param, 'lr': 0.01}
             params.append(alpha_lr)
         else:
             param_lr = {'params': param, 'lr': lr}
