@@ -12,8 +12,8 @@ config['num_transforms'] = 2  # For normalizing flows
 config['class_problem'] = True  # If classification problem or not
 config['inclusion_prob_prior'] = 0.01
 config['std_prior'] = 30.
-config['lower_init_lambda'] = -9
-config['upper_init_lambda'] = -4
+config['lower_init_lambda'] = 0
+config['upper_init_lambda'] = 5
 config['high_init_covariate_prob'] = True # If true, the inital covariate probs for the covariates will be set to lambda=5
 # For the linear and non-linear problem
 config['n_samples'] = 4*10**4

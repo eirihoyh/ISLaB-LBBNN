@@ -62,7 +62,7 @@ for dep in dep_levels:
         n_classes = 1  # Just need to set it to something above zero
         multiclass = False
 
-    BATCH_SIZE = int((n)/20)
+    BATCH_SIZE = int((n)/10)
     TRAIN_SIZE = int((n))
 
 
