@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # NOTE: Used lambda min=10 and lambda max=15
 config = {}
-config['num_epochs' ] = 2000  
+config['num_epochs' ] = 500  
 config['lr'] = .01
 config['post_train_epochs'] = 0  # If post training, then only MPM will be trained
 config['patience'] = 100000
