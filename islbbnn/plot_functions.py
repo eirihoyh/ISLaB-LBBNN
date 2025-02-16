@@ -424,7 +424,7 @@ def save_metrics(net, threshold=0.5, path="results/all_metrics"):
     # net = copy.deepcopy(net)
     clean_alpha_list = pip_func.clean_alpha(net, threshold)
     p = clean_alpha_list[0].shape[1]
-    layer_names = pip_func.create_layer_name_list()
+    layer_names = pip_func.create_layer_name_list(net=net)
 
     density, used_weights, tot_weights = pip_func.network_density_reduction(clean_alpha_list)
     mean_path_length, length_list = pip_func.average_path_length(clean_alpha_list)

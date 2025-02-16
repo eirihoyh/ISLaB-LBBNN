@@ -879,12 +879,13 @@ def pinball_loss(y_pred, y_true):
 
     return loss.mean() 
 
-def get_pinball_loss(net, data_loader, device, n_samples=100, n_classes=1):
+def get_pinball_loss(net, data_loader, device, n_samples=100):
+    net.to(device)
     with torch.no_grad():
         data, target = data_loader[:,:-1].to(device), data_loader[:,-1].to(device)
         n_samples = len(data)
 
-        outputs = torch.zeros(n_samples, n_samples, n_classes).to(device)
+        outputs = torch.zeros(n_samples, n_samples, 1).to(device)
         out2 = torch.zeros_like(outputs)
         for i in range(n_samples):
             
@@ -984,6 +985,7 @@ def ece_score_binary(output, label, n_bins=10):
 
 
 def get_ece_score(net, data_loader, device, n_samples=100, n_classes=1):
+    net.to(device)
     with torch.no_grad():
         data, target = data_loader[:,:-1].to(device), data_loader[:,-1].to(device)
 
@@ -993,27 +995,31 @@ def get_ece_score(net, data_loader, device, n_samples=100, n_classes=1):
             outputs[i] = net(data, sample=True, ensemble=True)  # model avg over structures and weights
             out2[i] = net(data, sample=True, ensemble=False)  # only model avg over weights where a > 0.5
 
-    target = target.type(torch.LongTensor).to(device)
+    if n_classes > 1:
+        target = target.type(torch.LongTensor).to(device)
     # Full model
     output1 = outputs.mean(0)
-    nll_full = net.loss(output1, target)
-    o = output1.detach().cpu().numpy()
-    
-
     # Median prob model
     out2 = out2.mean(0)
-    nll_median = net.loss(out2, target)
-    o2= out2.detach().cpu().numpy()
+    
 
+    tar = target.detach().cpu().numpy()
     if n_classes > 1:
+        nll_full = net.loss(output1, target) / len(data)
+        o = output1.detach().cpu().numpy()
+        nll_median = net.loss(out2, target) / len(data)
+        o2= out2.detach().cpu().numpy()
+
         ece_full = ece_score(np.exp(o),tar)
         ece_median = ece_score(np.exp(o2),tar)
     else:
-        ece_full = ece_score_binary(np.exp(o),tar)
-        ece_median = ece_score_binary(np.exp(o2),tar)
+        nll_full = net.loss(output1.T[0], target) / len(data)
+        o = output1.detach().cpu().numpy()
+        nll_median = net.loss(out2.T[0], target) / len(data)
+        o2= out2.detach().cpu().numpy()
 
-
-    tar = target.detach().cpu().numpy()
+        ece_full = ece_score_binary(o,tar)
+        ece_median = ece_score_binary(o2,tar)
 
     return ece_full, ece_median, nll_full, nll_median 
 
