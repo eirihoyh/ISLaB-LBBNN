@@ -56,7 +56,7 @@ path = "implementations/lrt/MNIST/"
 
 # test_res = []
 # for i in range(n_nets):
-#     net = torch.load(path+f"network/net{i}", weights_only=False,map_location=torch.device('cpu'))
+#     net = torch.load(path+f"network/net{i}_dense_init", weights_only=False,map_location=torch.device('cpu'))
 #     pf.save_metrics(net, path=path+f"results/net{i}")
 #     ece_full, ece_median, nll_full, nll_median = pip_func.get_ece_score(net, test_dat, device, n_samples=100, n_classes=n_classes)
 #     test_res.append([ece_full, ece_median, nll_full.cpu().detach().numpy(), nll_median.cpu().detach().numpy()])
