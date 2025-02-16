@@ -4,6 +4,7 @@ import copy
 
 import torch
 from torchmetrics import R2Score, MeanSquaredError
+from sklearn.metrics import mean_pinball_loss
 
 
 
@@ -867,3 +868,106 @@ def test_ensemble(net, test_data, DEVICE, SAMPLES, CLASSES=1, reg=True, verbose=
         
 
     return metr, metr_median
+
+
+def pinball_loss(y_pred, y_true):
+    
+    alpha = np.arange(0.05,1.00,0.05) #from 0.05 -> 0.95 in 0.05 increments
+    loss = np.zeros(len(alpha))
+    for i,a in enumerate(alpha):
+        loss[i] = mean_pinball_loss(y_true, y_pred,alpha = a)
+
+    return loss.mean() 
+
+def get_pinball_loss(net, data_loader, device, n_samples=100, n_classes=1):
+    with torch.no_grad():
+        data, target = data_loader[:,:-1].to(device), data_loader[:,-1].to(device)
+        n_samples = len(data)
+
+        outputs = torch.zeros(n_samples, n_samples, n_classes).to(device)
+        out2 = torch.zeros_like(outputs)
+        for i in range(n_samples):
+            
+            outputs[i] = net(data, sample=True, ensemble=True)  # model avg over structures and weights
+            out2[i] = net(data, sample=True, ensemble=False)  # only model avg over weights where a > 0.5
+
+    # Full model
+    output1 = outputs.mean(0).T[0]
+    o = output1.detach().cpu().numpy()
+
+    # Median prob model
+    out2 = out2.mean(0).T[0]    
+    o2= out2.detach().cpu().numpy()
+    
+    
+    tar = target.detach().cpu().numpy()
+
+    return pinball_loss(o,tar), pinball_loss(o2,tar)
+
+
+def ece_score(output, label, n_bins=10):
+
+   py = np.array(output)
+   y_test = np.array(label,dtype = int)
+   
+  
+
+   if y_test.ndim > 1:
+       y_test = np.argmax(y_test, axis=1)
+ 
+
+   py_index = np.argmax(py, axis=1)
+   py_value = []
+   for i in range(py.shape[0]):
+       py_value.append(py[i, py_index[i]])
+   py_value = np.array(py_value)
+  
+ 
+  
+   acc, conf = np.zeros(n_bins), np.zeros(n_bins)
+   Bm = np.zeros(n_bins)
+   for m in range(n_bins):
+       a, b = m / n_bins, (m + 1) / n_bins
+       for i in range(py.shape[0]):
+           if py_value[i] > a and py_value[i] <= b:
+               Bm[m] += 1
+               if py_index[i] == y_test[i]:
+                   acc[m] += 1
+               conf[m] += py_value[i]
+       if Bm[m] != 0:
+           acc[m] = acc[m] / Bm[m]
+           conf[m] = conf[m] / Bm[m]
+   ece = 0
+   for m in range(n_bins):
+       ece += Bm[m] * np.abs((acc[m] - conf[m]))
+   return ece / sum(Bm)
+
+def get_ece_score(net, data_loader, device, n_samples=100, n_classes=1):
+    with torch.no_grad():
+        data, target = data_loader[:,:-1].to(device), data_loader[:,-1].to(device)
+
+        outputs = torch.zeros(n_samples, len(data), n_classes).to(device)
+        out2 = torch.zeros_like(outputs)
+        for i in range(n_samples):
+            outputs[i] = net(data, sample=True, ensemble=True)  # model avg over structures and weights
+            out2[i] = net(data, sample=True, ensemble=False)  # only model avg over weights where a > 0.5
+
+    target = target.type(torch.LongTensor).to(device)
+    # Full model
+    output1 = outputs.mean(0)
+    nll_full = net.loss(output1, target)
+    o = output1.detach().cpu().numpy()
+    ece_full = ece_score(np.exp(o),tar)
+
+    # Median prob model
+    out2 = out2.mean(0)
+    nll_median = net.loss(out2, target)
+    o2= out2.detach().cpu().numpy()
+    ece_median = ece_score(np.exp(o2),tar)
+
+
+    tar = target.detach().cpu().numpy()
+
+    return ece_full, ece_median, nll_full, nll_median 
+
+
