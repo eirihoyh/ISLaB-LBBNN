@@ -942,6 +942,47 @@ def ece_score(output, label, n_bins=10):
        ece += Bm[m] * np.abs((acc[m] - conf[m]))
    return ece / sum(Bm)
 
+def ece_score_binary(output, label, n_bins=10):
+
+    pypy = np.array(output)
+    y_test = np.array(label,dtype = int)
+    
+    py = np.zeros((pypy.shape[0],2))
+    for i, prob in enumerate(pypy.squeeze()): #need two dimension for predicted probs
+        py[i,1] = prob
+        py[i,0] = 1 - prob
+            
+    if y_test.ndim > 1:
+        y_test = np.argmax(y_test, axis=1)
+    
+
+    py_index = np.argmax(py, axis=1)
+
+    
+    py_value = []
+    for i in range(py.shape[0]):
+        py_value.append(py[i, py_index[i]])
+    py_value = np.array(py_value)
+    
+    acc, conf = np.zeros(n_bins), np.zeros(n_bins)
+    Bm = np.zeros(n_bins)
+    for m in range(n_bins):
+        a, b = m / n_bins, (m + 1) / n_bins
+        for i in range(py.shape[0]):
+            if py_value[i] > a and py_value[i] <= b:
+                Bm[m] += 1
+                if py_index[i] == y_test[i]:
+                    acc[m] += 1
+                conf[m] += py_value[i]
+        if Bm[m] != 0:
+            acc[m] = acc[m] / Bm[m]
+            conf[m] = conf[m] / Bm[m]
+    ece = 0
+    for m in range(n_bins):
+        ece += Bm[m] * np.abs((acc[m] - conf[m]))
+    return ece / sum(Bm)
+
+
 def get_ece_score(net, data_loader, device, n_samples=100, n_classes=1):
     with torch.no_grad():
         data, target = data_loader[:,:-1].to(device), data_loader[:,-1].to(device)
@@ -957,13 +998,19 @@ def get_ece_score(net, data_loader, device, n_samples=100, n_classes=1):
     output1 = outputs.mean(0)
     nll_full = net.loss(output1, target)
     o = output1.detach().cpu().numpy()
-    ece_full = ece_score(np.exp(o),tar)
+    
 
     # Median prob model
     out2 = out2.mean(0)
     nll_median = net.loss(out2, target)
     o2= out2.detach().cpu().numpy()
-    ece_median = ece_score(np.exp(o2),tar)
+
+    if n_classes > 1:
+        ece_full = ece_score(np.exp(o),tar)
+        ece_median = ece_score(np.exp(o2),tar)
+    else:
+        ece_full = ece_score_binary(np.exp(o),tar)
+        ece_median = ece_score_binary(np.exp(o2),tar)
 
 
     tar = target.detach().cpu().numpy()
