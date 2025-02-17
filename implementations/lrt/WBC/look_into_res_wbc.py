@@ -46,16 +46,16 @@ test_dat = torch.tensor(np.column_stack((X_test_original,y_test_original)),dtype
 path = "implementations/lrt/WBC/"
 
 
-test_res = []
-for i in range(n_nets):
-    net = torch.load(path+f"network/net{i}", weights_only=False,map_location=torch.device('cpu'))
-    pf.save_metrics(net, path=path+f"results/net{i}")
-    ece_full, ece_median, nll_full, nll_median = pip_func.get_ece_score(net, test_dat, device, n_samples=100, n_classes=n_classes)
-    test_res.append([ece_full, ece_median, nll_full.cpu().detach().numpy(), nll_median.cpu().detach().numpy()])
+# test_res = []
+# for i in range(n_nets):
+#     net = torch.load(path+f"network/net{i}", weights_only=False,map_location=torch.device('cpu'))
+#     pf.save_metrics(net, path=path+f"results/net{i}")
+#     ece_full, ece_median, nll_full, nll_median = pip_func.get_ece_score(net, test_dat, device, n_samples=100, n_classes=n_classes)
+#     test_res.append([ece_full, ece_median, nll_full.cpu().detach().numpy(), nll_median.cpu().detach().numpy()])
 
 
-test_res = np.array(test_res)
-np.save(path+"results/ece", test_res)
+# test_res = np.array(test_res)
+# np.save(path+"results/ece", test_res)
 
 
 test_res = np.load(path+"results/ece.npy", allow_pickle=True)
@@ -135,18 +135,18 @@ print("")
 
 res = {}
 for i in range(p):
-    res[f"x{i}_inclution_rate"] = 0
+    res[f"x{i+1}_inclution_rate"] = 0
     
     for n in range(n_nets):
         median_info = np.load(path+f"results/net{n}_median.npy", allow_pickle=True).item()
-        #res[d][f"x{i}_inclution_rate"] += (median_info["expected_depth_input"][i]>0)
+        #res[d][f"x{i+1}_inclution_rate"] += (median_info["expected_depth_input"][i]>0)
         count = 0
         for j in median_info["include_inputs"]:
             count += j[i]
-        res[f"x{i}_inclution_rate"] += (count>0)
-    res[f"x{i}_inclution_rate"] /= n_nets
-    if res[f"x{i}_inclution_rate"] > 0:
-        print(f"x{i}_inclution_rate: {res[f'x{i}_inclution_rate']}")
+        res[f"x{i+1}_inclution_rate"] += (count>0)
+    res[f"x{i+1}_inclution_rate"] /= n_nets
+    if res[f"x{i+1}_inclution_rate"] > 0:
+        print(f"x{i+1}_inclution_rate: {res[f'x{i+1}_inclution_rate']}")
 
 # for k in res.keys():
 #     print(f"{k}: {res[k]}")

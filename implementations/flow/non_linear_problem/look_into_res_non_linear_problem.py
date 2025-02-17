@@ -28,7 +28,7 @@ X_test_original = np.loadtxt(f"data/non-linear/0.0X_test.txt", delimiter=",")
 y_test_original = np.loadtxt(f"data/non-linear/0.0Y_test.txt", delimiter=",")
 
 n, p = X_test_original.shape  # need this to get p 
-
+print(n,p)
 if class_problem:
     n_classes = len(np.unique(y_test_original))
     if n_classes == 2:
@@ -91,7 +91,7 @@ for d in dep_levels:
     res[d]["median_used_weights"] = np.median(data_median, 0)[1]
     res[d]["min_used_weights"] = np.min(data_median, 0)[1]
     res[d]["max_used_weights"] = np.max(data_median, 0)[1]
-    print("")
+    
 
 
 for d in dep_levels:
@@ -99,7 +99,7 @@ for d in dep_levels:
     for k in res[d].keys():
         print(f"{k}: {res[d][k]}")
 
-print("")
+    print("")
 
 res = {}
 res["used_weights"] = []

@@ -92,7 +92,6 @@ for d in dep_levels:
     res[d]["median_used_weights"] = np.median(data_median, 0)[1]
     res[d]["min_used_weights"] = np.min(data_median, 0)[1]
     res[d]["max_used_weights"] = np.max(data_median, 0)[1]
-    print("")
 
 
 print(list(res.keys()))
@@ -100,6 +99,7 @@ for d in dep_levels:
     print(f"Dep level {d}")
     for k in res[d].keys():
         print(f"{k}: {res[d][k]}")
+    print("")
 
 
 res = {}

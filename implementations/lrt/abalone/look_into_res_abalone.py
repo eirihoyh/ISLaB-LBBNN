@@ -62,6 +62,7 @@ print("Order: pinball_full, pinball_median")
 print(f"Median: {np.median(test_res,0)}")
 print(f"Min:    {np.min(test_res,0)}")
 print(f"Max:    {np.max(test_res,0)}")
+print("")
 
 
 res = {}
@@ -148,17 +149,17 @@ print(np.max(res["max_width"]))
 print("")
 
 res = {}
-for i in range(9):
-    res[f"x{i}_inclution_rate"] = 0
+for i in range(p):
+    res[f"x{i+1}_inclution_rate"] = 0
     
     for n in range(n_nets):
         median_info = np.load(path+f"results/net{n}_median.npy", allow_pickle=True).item()
-        #res[d][f"x{i}_inclution_rate"] += (median_info["expected_depth_input"][i]>0)
+        #res[d][f"x{i+1}_inclution_rate"] += (median_info["expected_depth_input"][i]>0)
         count = 0
         for j in median_info["include_inputs"]:
             count += j[i]
-        res[f"x{i}_inclution_rate"] += (count>0)
-    res[f"x{i}_inclution_rate"] /= n_nets
+        res[f"x{i+1}_inclution_rate"] += (count>0)
+    res[f"x{i+1}_inclution_rate"] /= n_nets
 
 for k in res.keys():
     print(f"{k}: {res[k]}")
