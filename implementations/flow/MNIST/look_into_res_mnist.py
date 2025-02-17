@@ -57,6 +57,8 @@ path = "implementations/flow/MNIST/"
 # test_res = []
 # for i in range(n_nets):
 #     net = torch.load(path+f"network/net{i}", weights_only=False,map_location=torch.device('cpu'))
+#     for c in range(n_classes):
+#         pf.plot_model_vision_image(net, train_data=test_dat[:,:-1], train_target=test_dat[:,-1], c=c, save_path=path+f"contribution_plots/net{i}_class{c}")
 #     pf.save_metrics(net, path=path+f"results/net{i}")
 #     ece_full, ece_median, nll_full, nll_median = pip_func.get_ece_score(net, test_dat, device, n_samples=100, n_classes=n_classes)
 #     test_res.append([ece_full, ece_median, nll_full.cpu().detach().numpy(), nll_median.cpu().detach().numpy()])

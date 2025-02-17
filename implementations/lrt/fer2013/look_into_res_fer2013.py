@@ -43,16 +43,18 @@ else:
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 test_dat = torch.tensor(np.column_stack((X_test_original,y_test_original)),dtype = torch.float32)
 
-test_res = []
-for i in range(n_nets):
-    net = torch.load(path+f"network/net{i}", weights_only=False,map_location=torch.device('cpu'))
-    pf.save_metrics(net, path=path+f"results/net{i}")
-    ece_full, ece_median, nll_full, nll_median = pip_func.get_ece_score(net, test_dat, device, n_samples=100, n_classes=n_classes)
-    test_res.append([ece_full, ece_median, nll_full.cpu().detach().numpy(), nll_median.cpu().detach().numpy()])
+# test_res = []
+# for i in range(n_nets):
+#     net = torch.load(path+f"network/net{i}", weights_only=False,map_location=torch.device('cpu'))
+#     for c in range(n_classes):
+#         pf.plot_model_vision_image(net, train_data=test_dat[:,:-1], train_target=test_dat[:,-1], c=c, save_path=path+f"contribution_plots/net{i}_class{c}")
+#     pf.save_metrics(net, path=path+f"results/net{i}")
+#     ece_full, ece_median, nll_full, nll_median = pip_func.get_ece_score(net, test_dat, device, n_samples=100, n_classes=n_classes)
+#     test_res.append([ece_full, ece_median, nll_full.cpu().detach().numpy(), nll_median.cpu().detach().numpy()])
 
 
-test_res = np.array(test_res)
-np.save(path+"results/ece", test_res)
+# test_res = np.array(test_res)
+# np.save(path+"results/ece", test_res)
 
 
 test_res = np.load(path+"results/ece.npy", allow_pickle=True)
