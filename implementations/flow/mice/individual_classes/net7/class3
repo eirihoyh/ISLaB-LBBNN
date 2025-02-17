@@ -1,0 +1,18 @@
+strict digraph "All paths!" {
+	I_11
+	Output_4
+	I_11 -> Output_4 [label="α=1.00"]
+	I_20
+	I_20 -> Output_4 [label="α=1.00"]
+	I_33
+	I_33 -> Output_4 [label="α=1.00"]
+	I_34
+	I_34 -> Output_4 [label="α=1.00"]
+	I_40
+	I_40 -> Output_4 [label="α=1.00"]
+	I_66
+	I_66 -> Output_4 [label="α=1.00"]
+	I_73
+	I_73 -> Output_4 [label="α=0.99"]
+	"All paths" [shape=Msquare]
+}

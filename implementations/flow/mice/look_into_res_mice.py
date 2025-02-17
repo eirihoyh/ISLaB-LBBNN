@@ -48,6 +48,7 @@ path = "implementations/flow/mice/"
 # test_res = []
 # for i in range(n_nets):
 #     net = torch.load(path+f"network/net{i}", weights_only=False,map_location=torch.device('cpu'))
+#     pf.plot_path_individual_classes(net, n_classes, path=path+f"individual_classes/net{i}")
 #     pf.save_metrics(net, path=path+f"results/net{i}")
 #     ece_full, ece_median, nll_full, nll_median = pip_func.get_ece_score(net, test_dat, device, n_samples=100, n_classes=n_classes)
 #     test_res.append([ece_full, ece_median, nll_full.cpu().detach().numpy(), nll_median.cpu().detach().numpy()])
@@ -135,18 +136,18 @@ print("")
 
 res = {}
 for i in range(p):
-    res[f"x{i}_inclution_rate"] = 0
+    res[f"x{i+1}_inclution_rate"] = 0
     
     for n in range(n_nets):
         median_info = np.load(path+f"results/net{n}_median.npy", allow_pickle=True).item()
-        #res[d][f"x{i}_inclution_rate"] += (median_info["expected_depth_input"][i]>0)
+        #res[d][f"x{i+1}_inclution_rate"] += (median_info["expected_depth_input"][i]>0)
         count = 0
         for j in median_info["include_inputs"]:
             count += j[i]
-        res[f"x{i}_inclution_rate"] += (count>0)
-    res[f"x{i}_inclution_rate"] /= n_nets
-    if res[f"x{i}_inclution_rate"] > 0:
-        print(f"x{i}_inclution_rate: {res[f'x{i}_inclution_rate']}")
+        res[f"x{i+1}_inclution_rate"] += (count>0)
+    res[f"x{i+1}_inclution_rate"] /= n_nets
+    if res[f"x{i+1}_inclution_rate"] > 0:
+        print(f"x{i+1}_inclution_rate: {res[f'x{i+1}_inclution_rate']}")
 
 # for k in res.keys():
 #     print(f"{k}: {res[k]}")
