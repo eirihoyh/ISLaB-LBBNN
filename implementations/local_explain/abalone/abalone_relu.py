@@ -204,7 +204,7 @@ pf.plot_local_explain_piecewise_linear_act(
     no_zero_contributions=False,
     include_potential_contribution=False,
     ann=False, 
-    save_path="implementations/local_explain/abalone/imgs/local_explain_equal_contribution")
+    save_path="implementations/local_explain/abalone/imgs/local_explain_10")
 
 # Empirical explanation
 explain_this = explain_this.reshape(-1, p)
@@ -217,7 +217,7 @@ pf.plot_local_contribution_empirical(
     variable_names=copy.deepcopy(variable_names), 
     class_names=["regression model"], 
     magnitude=True,
-    save_path="implementations/local_explain/abalone/imgs/local_explain_equal_contribution_emp_approach")
+    save_path="implementations/local_explain/abalone/imgs/local_explain_10_emp_approach")
 
 
 i = 201
@@ -236,7 +236,7 @@ pf.plot_local_explain_piecewise_linear_act(
     no_zero_contributions=False,
     include_potential_contribution=False, 
     ann=False, 
-    save_path="implementations/local_explain/abalone/imgs/local_explain_pos_pred")
+    save_path="implementations/local_explain/abalone/imgs/local_explain_17")
 
 # Empirical explanation
 explain_this = explain_this.reshape(-1, p)
@@ -249,7 +249,7 @@ pf.plot_local_contribution_empirical(
     variable_names=copy.deepcopy(variable_names), 
     class_names=["regression model"], 
     magnitude=True,
-    save_path="implementations/local_explain/abalone/imgs/local_explain_pos_pred_emp_approach")
+    save_path="implementations/local_explain/abalone/imgs/local_explain_17_emp_approach")
 
 
 
@@ -270,7 +270,7 @@ pf.plot_local_explain_piecewise_linear_act(
     no_zero_contributions=False,
     include_potential_contribution=False, 
     ann=False, 
-    save_path="implementations/local_explain/abalone/imgs/local_explain_net_pred")
+    save_path="implementations/local_explain/abalone/imgs/local_explain_8")
 
 # Empirical explanation
 explain_this = explain_this.reshape(-1, p)
@@ -283,4 +283,4 @@ pf.plot_local_contribution_empirical(
     variable_names=copy.deepcopy(variable_names), 
     class_names=["regression model"], 
     magnitude=True,
-    save_path="implementations/local_explain/abalone/imgs/local_explain_net_pred_emp_approach")
+    save_path="implementations/local_explain/abalone/imgs/local_explain_8_emp_approach")
