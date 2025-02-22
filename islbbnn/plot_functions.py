@@ -105,27 +105,10 @@ def run_path_graph_weight(net, threshold=0.5, save_path="path_graphs/all_paths_i
     plot_whole_path_graph_weight(weight_list, all_connections, save_path=save_path, zero_index=zero_index, show=show)
 
 
-def plot_local_contribution_empirical(
-        net, 
-        data, 
-        sample=True, 
-        median=True, 
-        n_samples=1, 
-        include_bias=True, 
-        save_path=None, 
-        n_classes=1, 
-        class_names=None, 
-        variable_names=None, 
-        quantiles=[0.025,0.975], 
-        include_zero_means=True, 
-        magnitude=False, 
-        include_potential_contribution=False):
+def plot_local_contribution_empirical(net, data, sample=True, median=True, n_samples=1, include_bias=True, save_path=None, n_classes=1, class_names=None, variable_names=None, quantiles=[0.025,0.975], include_zero_means=True, magnitude=False, include_potential_contribution=False):
     '''
     Empirical local explaination model. This should be used for tabular data as 
-    images usually has too many variables to get a good plot.
-
-    TODO: Make sure that it is up to date regarding previous notebooks and 
-        that contributions is computed using the gradient approach (much more efficient).
+    images usually has too many variables to get a good plot
     '''
     variable_names = copy.deepcopy(variable_names)
     if magnitude:
@@ -137,7 +120,13 @@ def plot_local_contribution_empirical(
     if variable_names == None:
         variable_names = np.arange(data.shape[-1])
         variable_names = list(variable_names.astype(str))
-    variable_names.append("bias")
+    variable_names_old = np.array(variable_names)
+
+    variable_names = []
+    for i in range(data.shape[-1]):
+        new_name=variable_names_old[i] + f"={data.cpu().detach().numpy()[0,i]:.2f}"
+        variable_names.append(new_name)
+    variable_names.append("bias=1.00")
     variable_names = np.array(variable_names)
 
     preds_means = np.mean(preds,0)[0]
@@ -179,8 +168,112 @@ def plot_local_contribution_empirical(
         ax.set_title(f'Empirical explaination of {class_names[c]}')
         ax.grid()
         if save_path != None:
+            plt.tight_layout()
             plt.savefig(save_path+f"_class_{class_names[c]}")
 
+        plt.show()
+
+
+def plot_local_explain_piecewise_linear_act(
+        net, 
+        input_data,
+        median=True, 
+        sample=True, 
+        n_samples=1,
+        n_classes=1,
+        magnitude=True,
+        include_potential_contribution=False,
+        variable_names=None,
+        class_names=None,
+        include_prediction=True,
+        include_bias=True,
+        no_zero_contributions=False,
+        fig_size=(10,6),
+        cred_int=[0.025,0.975],
+        ann=False,
+        thresh=0.005,
+        save_path=None):
+    '''
+    NOTE: we assume that bias is the first element in input_data tensor.
+    '''
+    expl, preds, p = pip_func.local_explain_piecewise_linear_act(
+        net,
+        input_data,
+        median=median,
+        sample=sample,
+        n_samples=n_samples,
+        magnitude=magnitude,
+        include_potential_contribution=include_potential_contribution,
+        n_classes=n_classes)
+    
+    if class_names == None:
+        class_names = ["" for _ in range(n_classes)]
+    else: 
+        class_names = [f"Class: {name}" for name in class_names]
+
+    if variable_names == None:
+        variable_names = [f"x{i+1}" for i in range(p)]
+
+    for i, v in enumerate(variable_names):
+        variable_names[i] = v + f"={input_data[i].cpu().detach().numpy():.2f}"
+    
+    variable_names = np.array(variable_names)
+
+
+    if include_bias:
+        bias_explanation = (preds.cpu().detach().numpy() - (input_data.cpu().detach().numpy()[:,None]*expl).sum(1))
+        variable_names = np.append(variable_names, "bias=1.00")
+        expl = np.concatenate((expl, bias_explanation[:,None,:]),1)
+        p+=1
+        
+    for c in range(n_classes):
+        # Will plot one class at-a-time
+        expl_class = copy.deepcopy(expl[:,:,c])
+        p_class = copy.deepcopy(p)
+        variable_names_class = copy.deepcopy(variable_names)
+
+        if no_zero_contributions:
+            mask=np.ones(expl_class.shape[1], dtype=bool)
+            if ann:
+                all_zeros = np.where(np.isclose(expl_class, 0, thresh, thresh))[1]
+                remove_p = len(all_zeros)
+            else:
+                all_zeros = (expl_class==0).all(0)
+                remove_p = sum(all_zeros)
+            mask[all_zeros] = False
+            expl_class = expl_class[:,mask]
+            variable_names_class = variable_names_class[mask] 
+            p_class-=remove_p
+
+        if include_prediction:
+            expl_class = np.concatenate((expl_class, preds[:,c:c+1].cpu().detach().numpy()),1)
+            variable_names_class=np.append(variable_names_class, ["Prediction"])
+            p_class+=1
+
+        means = expl_class.mean(0)
+        cred = np.quantile(expl_class, cred_int, axis=0).T
+        for indx, err in enumerate(cred):
+            if err[0] == 0 and err[1] == 0:
+                err[0] = means[indx]
+                err[1] = means[indx]
+        top = cred[:,1]-means
+        bottom = means-cred[:,0]
+        # Plot the explanation tensor
+        plt.figure(figsize=fig_size)
+        plt.bar(range(p_class), means, yerr=(bottom, top), align='center', alpha=0.5, edgecolor='k', capsize=10)
+        plt.xlabel('Covariates')
+        plt.ylabel('Gradient')
+        plt.title(f'Covariate contribution to model prediction. {class_names[c]}')
+        plt.xticks(range(p_class), [f'{variable_names_class[i]}' for i in range(p_class)], rotation=90)  # Rotate x-axis labels if necessary
+        plt.grid()
+        plt.tight_layout()
+        if save_path!=None:
+            # save figures as png
+            if n_classes > 1:
+                save_path += f"{c}.png"
+            else:
+                save_path += ".png"
+            plt.savefig(save_path)
         plt.show()
 
 def plot_path_individual_classes(net, CLASSES, path="individual_classes"):

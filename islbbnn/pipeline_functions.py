@@ -182,6 +182,38 @@ def weight_matrices_std_numpy(net):
 
     return w
 
+def mu_matrices_bias(net):
+    weight_matrices_bias = []
+    n_hidden_layers = nr_hidden_layers(net)
+    for name, param in net.named_parameters():
+        for i in range(n_hidden_layers+1):
+            if f'linears.{i}.bias_mu' in name:
+                weight_matrices_bias.append(copy.deepcopy(param.data))
+    return weight_matrices_bias
+
+def mu_matrices_bias_numpy(net):
+    w = mu_matrices_bias(net)
+    for i in range(len(w)):
+        w[i] = w[i].detach().numpy()
+
+    return w
+
+def std_matrices_bias(net):
+    weight_matrices_bias = []
+    n_hidden_layers = nr_hidden_layers(net)
+    for name, param in net.named_parameters():
+        for i in range(n_hidden_layers+1):
+            if f'linears.{i}.bias_rho' in name:
+                weight_matrices_bias.append(copy.deepcopy(torch.log1p(torch.exp(param)).cpu().data))
+    return weight_matrices_bias
+
+def std_matrices_bias_numpy(net):
+    w = std_matrices_bias(net)
+    for i in range(len(w)):
+        w[i] = w[i].detach().numpy()
+
+    return w
+
 def get_alphas(net):
     """
     Get all weight probabilities in the model.
@@ -462,10 +494,16 @@ def get_weight_and_bias(net, alphas_numpy, median=True, sample=False, threshold=
     weights = weight_matrices_numpy(net)
     std_weigth = weight_matrices_std_numpy(net)
 
+    bias_weights = mu_matrices_bias_numpy(net)
+    bias_weights_std = std_matrices_bias_numpy(net)
+
     if sample:
         for i in range(len(weights)):
             std = std_weigth[i]
             weights[i] += np.random.normal(0,std)
+
+            std_bias = bias_weights_std[i]
+            bias_weights[i] += np.random.normal(0,std_bias)
 
     if median:
         for i in range(len(weights)):
@@ -476,21 +514,21 @@ def get_weight_and_bias(net, alphas_numpy, median=True, sample=False, threshold=
             weights[i] *= include
             alphas_numpy[i] = copy.deepcopy(include)
 
-    return weights, alphas_numpy
+    return weights, bias_weights, alphas_numpy
 
-def relu_activation(input_data,weights):
+def relu_activation(input_data,weights, bias_weights):
     output_list = []
     out = np.array([[]])
     for i, w in enumerate(weights[:-1]):
         out = np.concatenate((out, input_data.detach().numpy()),1)
-        out = out@w.T
+        out = out@w.T + bias_weights[i]
         out = out*(out>0) # ReLU activation
         # print(out)
         output_list.append(out)
     
     # No activation in last layer (prediction/output layer)
     out = np.concatenate((out, input_data.detach().numpy()),1)
-    out = out@weights[-1].T
+    out = out@weights[-1].T + bias_weights[-1]
     # print(out)
     output_list.append(out)
 
@@ -626,14 +664,14 @@ def local_explain_relu_magnitude(net, input_data, threshold=0.5, median=True, sa
         alphas_numpy = get_alphas_numpy(net)
         nr_classes = alphas_numpy[-1].shape[0]
         
-        weights, alphas_numpy = get_weight_and_bias(net, alphas_numpy, median, sample, threshold) 
+        weights, bias_weights, alphas_numpy = get_weight_and_bias(net, alphas_numpy, median, sample, threshold) 
 
         # Get alpha matrices to torch to work for "clean_alpha_class" func
         alphas = copy.deepcopy(alphas_numpy)
         for i in range(len(alphas)):
             alphas[i] = torch.tensor(alphas[i])
 
-        out, output_list = relu_activation(input_data, weights)
+        out, output_list = relu_activation(input_data, weights, bias_weights)
         if verbose: print(out) # "Predicted" values after sending data through network
         preds.append(out)
         contribution_classes = {}
@@ -666,6 +704,8 @@ def local_explain_relu_magnitude(net, input_data, threshold=0.5, median=True, sa
                 else:
                     pred_impact[pi] = 0 if input_data.detach().numpy()[0,pi] == 0 else x[0,0]
 
+
+            pred_impact["bias"] = out[0,c] - sum(input_data.detach().numpy()[0]*list(pred_impact.values())) # Bias will be what the inputs can't explain
             contribution_classes[c] = pred_impact
         contributions[n] = contribution_classes
 
@@ -680,6 +720,9 @@ def local_explain_relu_magnitude(net, input_data, threshold=0.5, median=True, sa
                 values[s] = contributions[s][c][pi]
             mean_contribution[c][pi] = np.mean(values)
             cred_contribution[c][pi] = np.quantile(values, quantiles) # diff CI, uses 95\% as standard
+        bias_contr = np.array([contributions[s][c]["bias"] for s in range(n_samples)])
+        mean_contribution[c]["bias"] = np.mean(bias_contr)
+        cred_contribution[c]["bias"] = np.quantile(bias_contr, quantiles)  # TODO: In cases with a lot of zeros, and a few digits, one could get [0,0]. This would harm the current plotting function.
 
     return mean_contribution, cred_contribution, np.array(preds)
 
@@ -710,6 +753,49 @@ def local_explain_grad(net, data, p, n_samples=10_000, sample=True, ensemble=Fal
 # def global_explain_grad(net, data ,p, n_samples=1_000, sample=True, ensemble=False):
 #     for d in data:
 #         local_explain_grad(net, d, p, n_samples, sample, ensemble)
+
+
+
+def local_explain_piecewise_linear_act(
+        net, 
+        input_data, 
+        median=True, 
+        sample=True, 
+        n_samples=1,
+        magnitude=True,
+        include_potential_contribution=False,
+        n_classes=1):
+
+    p = input_data.shape[0]
+    explanation = torch.zeros((n_samples,p,n_classes))
+    preds = torch.zeros((n_samples,n_classes))
+    for j in range(n_samples):
+        
+        explain_this = input_data.reshape(-1, p)
+        explain_this.requires_grad = True
+        net.zero_grad()
+        output = net.forward_preact(explain_this, sample=sample, ensemble=not median)
+        for c in range(n_classes):
+            output_value = output[0,c]
+            output_value.backward(retain_graph=True)
+
+            gradients = explain_this.grad
+            explanation[j,:,c] = gradients[0]
+            preds[j,c] = output[0,c]
+
+    expl = explanation.cpu().detach().numpy()
+    inds = np.where(explain_this == 0.0)[1]
+    if include_potential_contribution:
+        # If covariate=0, we assume that the contribution is negative (good/bad that it is not included)
+        expl[:,inds] = -expl[:,inds]
+    else:
+        # remove variables that does not contribute to the prediction at all
+        expl[:,inds] = 0
+
+    if not magnitude:
+        expl = input_data.cpu().detach().numpy()[:,None]*expl
+
+    return expl, preds, p
 
 def train(net, train_data, optimizer, batch_size, num_batches, p, DEVICE, nr_weights, multiclass=False, verbose=True, post_train=False):
     net.train()
