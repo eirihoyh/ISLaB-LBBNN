@@ -1,55 +1,79 @@
 strict digraph "All paths!" {
 	I_1
-	H3_2
-	I_1 -> H3_2 [label="w=0.68"]
-	H3_4
-	I_1 -> H3_4 [label="w=-1.04"]
+	H3_1
+	I_1 -> H3_1 [label="w=-0.62"]
 	I_2
-	H3_10
-	I_2 -> H3_10 [label="w=0.75"]
+	H3_2
+	I_2 -> H3_2 [label="w=1.02"]
 	I_3
-	I_3 -> H3_10 [label="w=0.11"]
-	H3_11
-	I_1 -> H3_11 [label="w=-0.66"]
+	I_3 -> H3_2 [label="w=-0.10"]
+	H3_5
+	I_1 -> H3_5 [label="w=2.08"]
+	H3_7
+	I_1 -> H3_7 [label="w=-1.07"]
+	H3_10
+	I_2 -> H3_10 [label="w=0.82"]
+	H3_13
+	I_2 -> H3_13 [label="w=-1.15"]
+	I_3 -> H3_13 [label="w=-0.02"]
+	H3_16
+	I_2 -> H3_16 [label="w=0.66"]
 	H3_17
-	I_3 -> H3_17 [label="w=-0.98"]
-	H3_18
-	I_2 -> H3_18 [label="w=-0.84"]
-	I_3 -> H3_18 [label="w=0.05"]
+	I_3 -> H3_17 [label="w=-1.09"]
 	H4_4
-	H3_4 -> H4_4 [label="w=-8.76"]
-	H3_10 -> H4_4 [label="w=-11.16"]
-	H3_17 -> H4_4 [label="w=-0.16"]
-	I_1 -> H4_4 [label="w=1.11"]
-	I_2 -> H4_4 [label="w=1.43"]
+	H3_1 -> H4_4 [label="w=9.88"]
+	H3_7 -> H4_4 [label="w=-6.17"]
+	H3_10 -> H4_4 [label="w=-10.74"]
+	H3_17 -> H4_4 [label="w=-4.14"]
+	I_1 -> H4_4 [label="w=2.73"]
+	I_2 -> H4_4 [label="w=2.02"]
+	I_3 -> H4_4 [label="w=-0.52"]
 	H4_8
-	H3_4 -> H4_8 [label="w=9.31"]
-	H3_11 -> H4_8 [label="w=14.97"]
-	I_1 -> H4_8 [label="w=-0.06"]
-	I_2 -> H4_8 [label="w=-2.47"]
+	I_3 -> H4_8 [label="w=0.92"]
+	H4_11
+	H3_10 -> H4_11 [label="w=-7.61"]
+	H3_13 -> H4_11 [label="w=-6.18"]
+	I_1 -> H4_11 [label="w=-1.79"]
 	H4_12
-	I_3 -> H4_12 [label="w=-0.81"]
+	H3_10 -> H4_12 [label="w=-8.91"]
+	H3_16 -> H4_12 [label="w=-8.70"]
+	I_1 -> H4_12 [label="w=-3.06"]
+	I_3 -> H4_12 [label="w=0.27"]
 	H4_13
-	H3_2 -> H4_13 [label="w=-8.85"]
-	H3_10 -> H4_13 [label="w=3.86"]
-	H3_17 -> H4_13 [label="w=-2.24"]
-	H3_18 -> H4_13 [label="w=-3.89"]
-	I_1 -> H4_13 [label="w=0.56"]
-	I_2 -> H4_13 [label="w=-2.77"]
-	I_3 -> H4_13 [label="w=-0.22"]
+	H3_1 -> H4_13 [label="w=17.81"]
+	H3_17 -> H4_13 [label="w=-3.54"]
+	I_1 -> H4_13 [label="w=1.15"]
+	I_2 -> H4_13 [label="w=-1.95"]
+	H4_15
+	H3_13 -> H4_15 [label="w=11.62"]
+	I_1 -> H4_15 [label="w=1.04"]
+	H4_18
+	H3_13 -> H4_18 [label="w=-12.91"]
+	I_1 -> H4_18 [label="w=-1.34"]
+	I_3 -> H4_18 [label="w=-0.41"]
 	H4_19
-	H3_10 -> H4_19 [label="w=-9.12"]
-	H3_17 -> H4_19 [label="w=0.30"]
-	H3_18 -> H4_19 [label="w=-10.81"]
-	I_1 -> H4_19 [label="w=-2.56"]
-	I_2 -> H4_19 [label="w=-0.83"]
-	I_3 -> H4_19 [label="w=0.28"]
+	H3_2 -> H4_19 [label="w=-10.95"]
+	H3_10 -> H4_19 [label="w=3.76"]
+	H3_13 -> H4_19 [label="w=-2.36"]
+	H3_17 -> H4_19 [label="w=-0.87"]
+	I_1 -> H4_19 [label="w=-1.37"]
+	I_2 -> H4_19 [label="w=-1.45"]
+	I_3 -> H4_19 [label="w=-0.24"]
+	H4_20
+	H3_5 -> H4_20 [label="w=4.12"]
+	H3_7 -> H4_20 [label="w=8.99"]
+	I_2 -> H4_20 [label="w=-2.05"]
+	I_3 -> H4_20 [label="w=-1.53"]
 	Output_1
-	H4_4 -> Output_1 [label="w=28.99"]
-	H4_8 -> Output_1 [label="w=-21.32"]
-	H4_12 -> Output_1 [label="w=7.36"]
-	H4_13 -> Output_1 [label="w=28.43"]
-	H4_19 -> Output_1 [label="w=29.15"]
-	I_3 -> Output_1 [label="w=-0.07"]
+	H4_4 -> Output_1 [label="w=34.25"]
+	H4_8 -> Output_1 [label="w=-3.23"]
+	H4_11 -> Output_1 [label="w=14.65"]
+	H4_12 -> Output_1 [label="w=24.91"]
+	H4_13 -> Output_1 [label="w=30.01"]
+	H4_15 -> Output_1 [label="w=-8.87"]
+	H4_18 -> Output_1 [label="w=21.18"]
+	H4_19 -> Output_1 [label="w=24.22"]
+	H4_20 -> Output_1 [label="w=-14.13"]
+	I_1 -> Output_1 [label="w=0.94"]
 	"All paths" [shape=Msquare]
 }

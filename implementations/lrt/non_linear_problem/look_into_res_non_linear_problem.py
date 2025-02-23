@@ -73,8 +73,8 @@ for d in dep_levels:
 
 res = {}
 for d in dep_levels:
-    data = np.loadtxt(path+f"results/lrt_class_skip_4_hidden_20_dim_500_epochs_0.01_lr_non_lin_func_dep_level_{d}_sigmoid_full.txt", delimiter=",")
-    data_median = np.loadtxt(path+f"results/lrt_class_skip_4_hidden_20_dim_500_epochs_0.01_lr_non_lin_func_dep_level_{d}_sigmoid_median.txt", delimiter=",")
+    data = np.loadtxt(path+f"results/lrt_class_skip_4_hidden_20_dim_750_epochs_0.01_lr_non_lin_func_dep_level_{d}_sigmoid_full.txt", delimiter=",")
+    data_median = np.loadtxt(path+f"results/lrt_class_skip_4_hidden_20_dim_750_epochs_0.01_lr_non_lin_func_dep_level_{d}_sigmoid_median.txt", delimiter=",")
     res[d] = {}
     res[d]["median_acc_full"] = np.median(data, 0)[0]
     res[d]["min_acc_full"] = np.min(data, 0)[0]
