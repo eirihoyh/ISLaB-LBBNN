@@ -415,7 +415,106 @@ def plot_local_contribution_images_contribution_empirical(net, explain_this, n_c
         plt.show()
 
 
-def plot_local_contribution_images_contribution_empirical_magnitude(net, explain_this, n_classes=1, class_names=None, sample=True, median=True, n_samples=100, quantiles=[0.025,0.975], save_path=None, include_potential_contribution=False):
+def plot_local_contribution_images_contribution_gradient_approach(
+        net, 
+        input_data, 
+        n_classes=1, 
+        class_names=None, 
+        sample=True, 
+        median=True, 
+        n_samples=100, 
+        cred_int=[0.025,0.975], 
+        magnitude=True,
+        save_path=None, 
+        include_potential_contribution=False):
+    '''
+    NOTE: Only works for ReLU based networks 
+    '''
+    expl, preds, p = pip_func.local_explain_piecewise_linear_act(
+        net,
+        input_data,
+        median=median,
+        sample=sample,
+        n_samples=n_samples,
+        magnitude=magnitude,
+        include_potential_contribution=include_potential_contribution,
+        n_classes=n_classes)
+    preds = copy.deepcopy(preds.cpu().detach().numpy())
+
+    lower, upper = np.quantile(np.exp(preds).T/np.sum(np.exp(preds),1),cred_int, 1)
+
+    if class_names == None:
+        class_names = np.arange(n_classes)
+
+    p = int(input_data.shape[-1]**0.5)  # NOTE: Only valid for quadratic imgs. Should be fixed for general shapes
+
+    colors_025 = ["blue", "white", "red"]
+    colors_975 = ["blue", "white", "red"]
+    used_img = copy.deepcopy(input_data.reshape((p,p)))
+    for c in range(n_classes):
+        expl_class = copy.deepcopy(expl[:,:,c])
+        cred = np.quantile(expl_class, cred_int, axis=0).T
+        
+        input_025 = copy.deepcopy(cred)[:,0].reshape((p,p))
+        input_025 = np.array(input_025)
+        input_975 = copy.deepcopy(cred)[:,1].reshape((p,p))
+        input_975 = np.array(input_975)
+
+        explained_025 = np.where(abs(input_025)>0, input_025, np.nan)
+        explained_975 = np.where(abs(input_975)>0, input_975, np.nan)
+        
+        maxima_025 = np.nanmax(explained_025)
+        minima_025 = np.nanmin(explained_025)
+
+        maxima_975 = np.nanmax(explained_975)
+        minima_975 = np.nanmin(explained_975)
+        fig, axs = plt.subplots(1,2, figsize=(8,8))
+
+
+        maxima = np.max([maxima_025, maxima_975,0])
+        minima = np.min([minima_025, minima_975,0])
+        
+        cmap_025 = mcolors.LinearSegmentedColormap.from_list("", colors_025)
+        cmap_975 = mcolors.LinearSegmentedColormap.from_list("", colors_975)
+                
+        axs[0].imshow(used_img, cmap="Greys", vmin=torch.min(used_img), vmax=torch.max(used_img)+0.5)
+        axs[1].imshow(used_img, cmap="Greys", vmin=torch.min(used_img), vmax=torch.max(used_img)+0.5)
+        norm_lower = TwoSlopeNorm(vmin=minima-0.001, vcenter=0, vmax=maxima+0.001)
+        im = axs[0].imshow(explained_025, cmap=cmap_025, norm=norm_lower)
+        cbar = fig.colorbar(im, ax=axs[0], fraction=0.046, pad=0.04)
+        cbar.ax.set_yscale('linear')
+
+        norm_upper = TwoSlopeNorm(vmin=minima-0.001, vcenter=0, vmax=maxima+0.001)
+        im = axs[1].imshow(explained_975, cmap=cmap_975, norm=norm_upper)
+        cbar = fig.colorbar(im, ax=axs[1], fraction=0.046, pad=0.04)
+        cbar.ax.set_yscale('linear')
+        
+        axs[0].set_title(f"0.025 quantile")
+        axs[1].set_title(f"0.975 quantile")
+
+        axs[0].set_xticks([])
+        axs[0].set_yticks([])
+        axs[1].set_xticks([])
+        axs[1].set_yticks([])
+        fig.suptitle(f"Local explain class: {class_names[c]}. Credibility interval: [{lower[c]:.4f}, {upper[c]:.4f}]")
+        plt.tight_layout(rect=[0, 0.03, 1, 1.3])
+        if save_path != None:
+            plt.savefig(f"{save_path}/{class_names[c]}_grad_approach.png", bbox_inches='tight')
+        plt.show()
+
+
+
+def plot_local_contribution_images_contribution_empirical_magnitude(
+        net, 
+        explain_this, 
+        n_classes=1, 
+        class_names=None, 
+        sample=True, 
+        median=True, 
+        n_samples=100, 
+        quantiles=[0.025,0.975], 
+        save_path=None, 
+        include_potential_contribution=False):
     '''
     NOTE: Only works for ReLU based networks 
     '''
@@ -481,7 +580,7 @@ def plot_local_contribution_images_contribution_empirical_magnitude(net, explain
         fig.suptitle(f"Local explain class: {class_names[i]}. Credibility interval: [{lower[i]:.4f}, {upper[i]:.4f}]")
         plt.tight_layout(rect=[0, 0.03, 1, 1.3])
         if save_path != None:
-            plt.savefig(f"{save_path}/{class_names[i]}.png", bbox_inches='tight')
+            plt.savefig(f"{save_path}/{class_names[i]}_emp_approach.png", bbox_inches='tight')
         plt.show()
 
 def get_metrics(net, threshold=0.5):
