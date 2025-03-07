@@ -777,9 +777,7 @@ def local_explain_piecewise_linear_act(
         output = net.forward_preact(explain_this, sample=sample, ensemble=not median)
         for c in range(n_classes):
             output_value = output[0,c]
-            output_value.backward(retain_graph=True)
-
-            gradients = explain_this.grad
+            gradients = torch.autograd.grad(output_value, explain_this, grad_outputs=torch.ones_like(output_value), retain_graph=True)
             explanation[j,:,c] = gradients[0]
             preds[j,c] = output[0,c]
 
