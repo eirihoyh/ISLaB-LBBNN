@@ -1,0 +1,11 @@
+torch
+scikit-learn
+matplotlib
+tqdm
+scipy
+numpy
+pandas
+torcheval
+torchmetrics
+torchvision
+graphviz # Requires manual install as well: https://www.graphviz.org/download/
