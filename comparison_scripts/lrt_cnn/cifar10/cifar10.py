@@ -54,10 +54,10 @@ stride = config['stride']
 padding = config['padding']
 
 #---------DATA------------
-trainset = torchvision.datasets.MNIST(
-    root='./mnist', train=True, download=True, transform=transforms.ToTensor())
-testset = torchvision.datasets.MNIST(
-    root='./mnist', train=False, download=True, transform=transforms.ToTensor())
+trainset = torchvision.datasets.CIFAR10(
+    root='./cifar10', train=True, download=True, transform=transforms.ToTensor())
+testset = torchvision.datasets.CIFAR10(
+    root='./cifar10', train=False, download=True, transform=transforms.ToTensor())
 
 train_data = trainset.data/255.
 train_target = trainset.targets
@@ -65,21 +65,19 @@ train_target = trainset.targets
 test_data = (testset.data/255.)
 test_target = testset.targets
 
-print(test_target)
+print(np.unique(test_target))
 
 print(train_data.shape)
+print(type(train_data))
 
-n, p1, p2 = train_data.shape
-
-# Need to define number of initial channels as well
-channels = 1
+n, p1, p2, channels = train_data.shape
 
 p = channels*p1*p2
 
-X_train_original = train_data.detach().numpy().reshape(-1,p)
-X_test_original = test_data.detach().numpy().reshape(-1,p)
-y_train_original = train_target.detach().numpy()
-y_test_original = test_target.detach().numpy()
+X_train_original = train_data.reshape(-1,p)
+X_test_original = test_data.reshape(-1,p)
+y_train_original = train_target
+y_test_original = test_target
 
 # n,p1,p2 = X_train_original.shape
 print(n,channels,p1,p2,dim)
@@ -88,7 +86,7 @@ n_classes = len(np.unique(y_train_original))
 multiclass = n_classes > 1
 
 # BATCH_SIZE = int((n)/10)
-BATCH_SIZE = int((n)/600)
+BATCH_SIZE = int((n)/500)
 # TEST_BATCH_SIZE = int(n*0.10) # Would normally call this the "validation" part (will be used during training)
 # VAL_BATCH_SIZE = int(n*0.10) # and this the "test" part (will be used after training)
 
@@ -151,7 +149,7 @@ for ni in range(n_nets):
     optimizer = optim.Adam(params, lr=lr)
     # optimizer = optim.Adam(net.parameters(), lr=lr)
     
-    scheduler = MultiStepLR(optimizer, milestones=[int(0.9*tot_rounds)], gamma=0.7) # int(0.3*tot_rounds), int(0.5*tot_rounds), int(0.7*tot_rounds), 
+    scheduler = MultiStepLR(optimizer, milestones=[int(0.3*tot_rounds), int(0.5*tot_rounds), int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.7)
 
     all_nll = []
     all_loss = []
@@ -196,7 +194,7 @@ for ni in range(n_nets):
     all_nets[ni] = net 
     # Results
     if save_res:
-        torch.save(net, f"comparison_scripts/lrt_cnn/mnist/network/net{ni}")
+        torch.save(net, f"comparison_scripts/lrt_cnn/cifar10/network/net{ni}")
     metrics, metrics_median = pip_func.test_ensemble(all_nets[ni], test_dat, DEVICE, SAMPLES=100, CLASSES=n_classes, reg=(not class_problem), multiclass=multiclass) # Test same data 10 times to get average 
     metrics_several_runs.append(metrics)
     metrics_median_several_runs.append(metrics_median)
@@ -213,6 +211,6 @@ print(m_median)
 
 if save_res:
     # m = np.array(metrics_several_runs)
-    np.savetxt(f'comparison_scripts/lrt_cnn/mnist/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_mnist_sigmoid_full.txt',m,delimiter = ',')
+    np.savetxt(f'comparison_scripts/lrt_cnn/cifar10/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_cifar10_sigmoid_full.txt',m,delimiter = ',')
     # m_median = np.array(metrics_median_several_runs)
-    np.savetxt(f'comparison_scripts/lrt_cnn/mnist/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_mnist_sigmoid_median.txt',m_median,delimiter = ',')
+    np.savetxt(f'comparison_scripts/lrt_cnn/cifar10/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_cifar10_sigmoid_median.txt',m_median,delimiter = ',')
