@@ -127,7 +127,7 @@ for ni in range(n_nets):
         a_prior=alpha_prior, 
         std_prior=std_prior, 
         n_classes=n_classes,
-        act_func=F.sigmoid,
+        act_func=F.relu,
         lower_init_lambda=lower_init_lambda,
         upper_init_lambda=upper_init_lambda,
         high_init_covariate_prob=high_init_covariate_prob).to(DEVICE)
@@ -160,6 +160,11 @@ for ni in range(n_nets):
             
     train_dat = torch.tensor(np.column_stack((X_train_original,y_train_original)),dtype = torch.float32)
     # val_dat = torch.tensor(np.column_stack((X_val,y_val)),dtype = torch.float32)
+
+    for name, param in net.named_parameters():
+        if f"lambdal" in name:
+            param.requires_grad_(False)
+
     
     # Train network
     counter = 0
@@ -169,6 +174,10 @@ for ni in range(n_nets):
         if verbose:
             print(epoch)
         nll, loss = pip_func.train(net, train_dat, optimizer, BATCH_SIZE, NUM_BATCHES, p, DEVICE, nr_weights, post_train=post_train, multiclass=multiclass)
+        all_nll.append(nll)
+        all_loss.append(loss)
+        scheduler.step()
+        
         nll_val, loss_val, ensemble_val = pip_func.val(net, test_dat, DEVICE, verbose=verbose, reg=(not class_problem), multiclass=multiclass)
         if ensemble_val >= highest_acc:
             counter = 0
@@ -177,8 +186,7 @@ for ni in range(n_nets):
         else:
             counter += 1
         
-        all_nll.append(nll)
-        all_loss.append(loss)
+        
 
         if epoch == epochs-1:
             post_train = True   # Post-train --> use median model 
@@ -188,8 +196,10 @@ for ni in range(n_nets):
 
         if counter >= patience:
             break
-
-        scheduler.step()
+        if epoch == 5:
+            for name, param in net.named_parameters():
+                if f"lambdal" in name:
+                    param.requires_grad_(True)
         
     all_nets[ni] = net 
     # Results
