@@ -88,15 +88,15 @@ class BayesianConv2d(nn.Module):
 
         if self.training or calculate_log_probs:
 
-            kl_bias = (torch.log(self.bias_sigma_prior / self.bias_sigma) - 0.5 + (self.bias_sigma ** 2
-                    + (self.bias_mu - self.bias_mu_prior) ** 2) / (
-                               2 * self.bias_sigma_prior ** 2)).sum()
+            kl_bias = (torch.log((self.bias_sigma_prior / (self.bias_sigma+torch.tensor(1e-45)))+torch.tensor(1e-45)) 
+                       - 0.5 + (self.bias_sigma ** 2 + (self.bias_mu - self.bias_mu_prior) ** 2) 
+                       / (2 * self.bias_sigma_prior ** 2 + torch.tensor(1e-45))).sum()
 
-            kl_weight = (self.alpha_q * (torch.log(self.sigma_prior / self.weight_sigma)
-                                         - 0.5 + torch.log(self.alpha_q / self.alpha_prior)
+            kl_weight = (self.alpha_q * (torch.log((self.sigma_prior / (self.weight_sigma+torch.tensor(1e-45))) +torch.tensor(1e-45))
+                                         - 0.5 + torch.log((self.alpha_q / (self.alpha_prior + torch.tensor(1e-45))) +torch.tensor(1e-45))
                                          + (self.weight_sigma ** 2 + (self.weight_mu - self.mu_prior) ** 2) / (
-                                                 2 * self.sigma_prior ** 2))
-                         + (1 - self.alpha_q) * torch.log((1 - self.alpha_q) / (1 - self.alpha_prior))).sum()
+                                                 2 * self.sigma_prior ** 2+torch.tensor(1e-45)))
+                         + (1 - self.alpha_q) * torch.log(((1 - self.alpha_q) / (1 - self.alpha_prior + torch.tensor(1e-45)))+torch.tensor(1e-45))).sum()
 
             self.kl = kl_bias + kl_weight
 
