@@ -833,7 +833,7 @@ def train(net, train_data, optimizer, batch_size, num_batches, p, DEVICE, nr_wei
         print('')
     return negative_log_likelihood.item(), loss.item()
 
-def val(net, val_data, DEVICE, multiclass=False, reg=False, verbose=True, post_train=False):
+def val(net, val_data, DEVICE, SAMPLES=100, multiclass=False, reg=False, verbose=True, post_train=False):
     '''
     NOTE: Will only validate using median model. 
     '''
@@ -847,7 +847,11 @@ def val(net, val_data, DEVICE, multiclass=False, reg=False, verbose=True, post_t
         else:
             target = _y.to(DEVICE)
             target = target.unsqueeze(1).float()
-        outputs = net(data, ensemble=False, calculate_log_probs=True, post_train=post_train)
+        outputs = torch.zeros(SAMPLES, data.shape[0], 10).to(DEVICE)
+        for i in range(SAMPLES):
+            outputs[i] = net.forward(data, sample=True, ensemble=True, calculate_log_probs=True, post_train=post_train)
+        # outputs = net(data, ensemble=False, calculate_log_probs=True, post_train=post_train)
+        outputs = outputs.mean(0)
         negative_log_likelihood = net.loss(outputs, target)
         loss = negative_log_likelihood + net.kl()
 
