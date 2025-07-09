@@ -196,7 +196,7 @@ def plot_local_explain_piecewise_linear_act(
     '''
     NOTE: we assume that bias is the first element in input_data tensor.
     '''
-    expl, preds, p = pip_func.local_explain_piecewise_linear_act(
+    expl, expl_mean, preds, pred_mean, p = pip_func.local_explain_piecewise_linear_act(
         net,
         input_data,
         median=median,
@@ -205,7 +205,7 @@ def plot_local_explain_piecewise_linear_act(
         magnitude=magnitude,
         include_potential_contribution=include_potential_contribution,
         n_classes=n_classes)
-    
+
     if class_names == None:
         class_names = ["" for _ in range(n_classes)]
     else: 
@@ -222,13 +222,16 @@ def plot_local_explain_piecewise_linear_act(
 
     if include_bias:
         bias_explanation = (preds.cpu().detach().numpy() - (input_data.cpu().detach().numpy()[:,None]*expl).sum(1))
+        bias_explanation_mean = (pred_mean.cpu().detach().numpy() - (input_data.cpu().detach().numpy()[:,None]*expl_mean).sum(0))
         variable_names = np.append(variable_names, "bias=1.00")
         expl = np.concatenate((expl, bias_explanation[:,None,:]),1)
+        expl_mean = np.concatenate((expl_mean, bias_explanation_mean.T),0)
         p+=1
-        
+
     for c in range(n_classes):
         # Will plot one class at-a-time
         expl_class = copy.deepcopy(expl[:,:,c])
+        expl_mean_class = copy.deepcopy(expl_mean[:,c])
         p_class = copy.deepcopy(p)
         variable_names_class = copy.deepcopy(variable_names)
 
@@ -242,11 +245,13 @@ def plot_local_explain_piecewise_linear_act(
                 remove_p = sum(all_zeros)
             mask[all_zeros] = False
             expl_class = expl_class[:,mask]
+            expl_mean_class = expl_mean_class[mask]
             variable_names_class = variable_names_class[mask] 
             p_class-=remove_p
 
         if include_prediction:
             expl_class = np.concatenate((expl_class, preds[:,c:c+1].cpu().detach().numpy()),1)
+            expl_mean_class = np.concatenate((expl_mean_class, pred_mean[c:c+1].cpu().detach().numpy()[0]),0)
             variable_names_class=np.append(variable_names_class, ["Prediction"])
             p_class+=1
 
@@ -260,7 +265,7 @@ def plot_local_explain_piecewise_linear_act(
         bottom = means-cred[:,0]
         # Plot the explanation tensor
         plt.figure(figsize=fig_size)
-        plt.bar(range(p_class), means, yerr=(bottom, top), align='center', alpha=0.5, edgecolor='k', capsize=10)
+        plt.bar(range(p_class), expl_mean_class, yerr=(bottom, top), align='center', alpha=0.5, edgecolor='k', capsize=10)
         plt.xlabel('Covariates')
         plt.ylabel('Gradient')
         plt.title(f'Covariate contribution to model prediction. {class_names[c]}')
@@ -430,7 +435,7 @@ def plot_local_contribution_images_contribution_gradient_approach(
     '''
     NOTE: Only works for ReLU based networks 
     '''
-    expl, preds, p = pip_func.local_explain_piecewise_linear_act(
+    expl, _, preds, p = pip_func.local_explain_piecewise_linear_act(
         net,
         input_data,
         median=median,

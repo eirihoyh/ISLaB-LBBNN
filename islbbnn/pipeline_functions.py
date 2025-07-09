@@ -767,6 +767,17 @@ def local_explain_piecewise_linear_act(
         n_classes=1):
 
     p = input_data.shape[0]
+
+    explanation_mean = torch.zeros((p,n_classes))
+    explain_this = input_data.reshape(-1, p)
+    explain_this.requires_grad = True
+    net.zero_grad()
+    output_mean = net.forward_preact(explain_this, sample=False, ensemble=False)
+    for c in range(n_classes):
+        output_value = output_mean[0,c]
+        gradients = torch.autograd.grad(output_value, explain_this, grad_outputs=torch.ones_like(output_value), retain_graph=True)
+        explanation_mean[:,c] = gradients[0]
+
     explanation = torch.zeros((n_samples,p,n_classes))
     preds = torch.zeros((n_samples,n_classes))
     for j in range(n_samples):
@@ -782,18 +793,21 @@ def local_explain_piecewise_linear_act(
             preds[j,c] = output[0,c]
 
     expl = explanation.cpu().detach().numpy()
+    expl_mean = explanation_mean.cpu().detach().numpy()
     inds = np.where(explain_this == 0.0)[1]
     if include_potential_contribution:
         # If covariate=0, we assume that the contribution is negative (good/bad that it is not included)
         expl[:,inds] = -expl[:,inds]
+        expl_mean[inds] = -expl_mean[inds]
     else:
         # remove variables that does not contribute to the prediction at all
         expl[:,inds] = 0
+        expl_mean[inds] = 0
 
     if not magnitude:
         expl = input_data.cpu().detach().numpy()[:,None]*expl
 
-    return expl, preds, p
+    return expl, expl_mean, preds, output_mean, p
 
 def train(net, train_data, optimizer, batch_size, num_batches, p, DEVICE, nr_weights, multiclass=False, verbose=True, post_train=False):
     net.train()
