@@ -199,7 +199,7 @@ for ni in range(n_nets):
 
         if counter >= patience:
             break
-        if epoch == 5:
+        if epoch == 2:
             for name, param in net.named_parameters():
                 if f"lambdal" in name:
                     param.requires_grad_(True)
