@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # NOTE: Used lambda min=-3 and lambda max=-1
 config = {}
-config['num_epochs' ] = 100  
-config['lr'] = .01
+config['num_epochs' ] = 250  
+config['lr'] = .005
 config['post_train_epochs'] = 0  # If post training, then only MPM will be trained
 config['patience'] = 10000
 config['n_nets'] = 10  # Number of different networks to run for one problem
