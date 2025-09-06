@@ -139,7 +139,7 @@ for ni in range(n_nets):
     params = []
     for name, param in net.named_parameters():
         if f"lambdal" in name:
-            alpha_lr = {'params': param, 'lr': 0.1}
+            alpha_lr = {'params': param, 'lr': .01}
             params.append(alpha_lr)
         else:
             param_lr = {'params': param, 'lr': lr}
@@ -150,7 +150,7 @@ for ni in range(n_nets):
     optimizer = optim.Adam(params, lr=lr)
     # optimizer = optim.Adam(net.parameters(), lr=lr)
     
-    scheduler = MultiStepLR(optimizer, milestones=[int(0.3*tot_rounds), int(0.5*tot_rounds), int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.7)
+    scheduler = MultiStepLR(optimizer, milestones=[int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.7) # int(0.3*tot_rounds), int(0.5*tot_rounds),
 
     all_nll = []
     all_loss = []
@@ -197,7 +197,7 @@ for ni in range(n_nets):
 
         if counter >= patience:
             break
-        if epoch == 5:
+        if epoch == 2:
             for name, param in net.named_parameters():
                 if f"lambdal" in name:
                     param.requires_grad_(True)
