@@ -127,7 +127,7 @@ for ni in range(n_nets):
         a_prior=alpha_prior, 
         std_prior=std_prior, 
         n_classes=n_classes,
-        act_func=F.relu,
+        act_func=F.leaky_relu,
         lower_init_lambda=lower_init_lambda,
         upper_init_lambda=upper_init_lambda,
         high_init_covariate_prob=high_init_covariate_prob).to(DEVICE)
@@ -149,7 +149,7 @@ for ni in range(n_nets):
     optimizer = optim.Adam(params, lr=lr)
     # optimizer = optim.Adam(net.parameters(), lr=lr)
     
-    scheduler = MultiStepLR(optimizer, milestones=[int(0.3*tot_rounds), int(0.5*tot_rounds), int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.7)
+    scheduler = MultiStepLR(optimizer, milestones=[int(0.7*tot_rounds), int(0.9*tot_rounds)], gamma=0.7) # int(0.3*tot_rounds), int(0.5*tot_rounds),
 
     all_nll = []
     all_loss = []
@@ -201,10 +201,20 @@ for ni in range(n_nets):
                 if f"lambdal" in name:
                     param.requires_grad_(True)
         
+        nr_active_weights = 0
+        nr_weights_total = 0
+        for name, param in net.named_parameters():
+            if f"lambdal" in name:
+                active_weights = copy.deepcopy(1 / (1 + np.exp(-param.cpu().data))).cpu().detach().numpy() > 0.5
+                nr_active_weights += np.sum(active_weights)
+                nr_weights_total += np.sum(np.prod(active_weights.shape))
+
+        print(f"Used weights: {nr_active_weights}, Total weights: {nr_weights_total}, Total density: {(nr_active_weights/nr_weights_total):.4f}")
+
     all_nets[ni] = net 
     # Results
     if save_res:
-        torch.save(net, f"comparison_scripts/lrt_cnn/cifar10/network/net{ni}")
+        torch.save(net, f"comparison_scripts/lrt_cnn/cifar10/network/net{ni}_lr_{lr}")
     metrics, metrics_median = pip_func.test_ensemble(all_nets[ni], test_dat, DEVICE, SAMPLES=100, CLASSES=n_classes, reg=(not class_problem), multiclass=multiclass) # Test same data 10 times to get average 
     metrics_several_runs.append(metrics)
     metrics_median_several_runs.append(metrics_median)
@@ -221,6 +231,6 @@ print(m_median)
 
 if save_res:
     # m = np.array(metrics_several_runs)
-    np.savetxt(f'comparison_scripts/lrt_cnn/cifar10/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_cifar10_sigmoid_full.txt',m,delimiter = ',')
+    np.savetxt(f'comparison_scripts/lrt_cnn/cifar10/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_cifar10_leaky_relu_full.txt',m,delimiter = ',')
     # m_median = np.array(metrics_median_several_runs)
-    np.savetxt(f'comparison_scripts/lrt_cnn/cifar10/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_cifar10_sigmoid_median.txt',m_median,delimiter = ',')
+    np.savetxt(f'comparison_scripts/lrt_cnn/cifar10/results/lrt_class_skip_{HIDDEN_LAYERS}_hidden_{dim}_dim_{epochs}_epochs_{lr}_lr_cifar10_leaky_relu_median.txt',m_median,delimiter = ',')

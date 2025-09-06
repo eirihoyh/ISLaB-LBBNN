@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # NOTE: Used lambda min=-3 and lambda max=-1
 config = {}
-config['num_epochs' ] = 100  
-config['lr'] = .01
+config['num_epochs' ] = 250
+config['lr'] = .001
 config['post_train_epochs'] = 0  # If post training, then only MPM will be trained
 config['patience'] = 10000
 config['n_nets'] = 10  # Number of different networks to run for one problem
@@ -18,7 +18,7 @@ config['upper_init_lambda'] = 15
 config['high_init_covariate_prob'] = True # If true, the inital covariate probs for the covariates will be set to lambda=5
 
 # CNN specific
-config['out_channels_list'] = [32,48,64]
+config['out_channels_list'] = [64,64,128]
 config['kernel_size'] = 3
 config['stride'] = 2
 config['padding'] = 0
